@@ -1,0 +1,10 @@
+#pragma once
+#define WINDOW_WIDTH 1024
+#define WINDOW_HEIGHT 576
+#define MAP_WIDTH 65
+#define MAP_HEIGHT 37
+#define FRAMERATE 60
+#define BASE_HEAR_DIST 1024
+#define BASE_NE_DIST 256
+#define BASE_LOS_CONE 3.14159 / 4
+#define BASE_FOLLOW_DIST 100
