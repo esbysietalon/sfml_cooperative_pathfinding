@@ -72,7 +72,7 @@ void Core::load() {
 	characters.emplace(characters.end(), _player);
 	
 	//load NPCs
-	generateNPCs(1);
+	generateNPCs(15);
 }
 
 void Core::draw(sf::RenderWindow* window) {

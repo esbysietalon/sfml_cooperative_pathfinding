@@ -113,10 +113,27 @@ void Brain::think() {
 	if (_thoughtQueue.size() == 0) {
 		//fprintf(stderr, "default behavior\n");
 		struct order_t* defaultBehaviour = new struct order_t;
-		defaultBehaviour->type = order_type_t::SAY;
+		
 		std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
-		Playable* defaultTarget = _sensedEntities.front();
+		Playable* defaultTarget = NULL;
+		for (int i = 0; i < _sensedEntities.size(); i++) {
+			if (_sensedEntities.at(i)->getSocial() < social) {
+				defaultTarget = _sensedEntities.at(i);
+				break;
+			}
+		}
 		defaultBehaviour->target = defaultTarget;
+		if (defaultTarget != NULL) {
+			defaultBehaviour->type = order_type_t::SAY;
+		}
+		else {
+			defaultBehaviour->type = order_type_t::MOVE;
+			int goalX = 0;
+			int goalY = 0;
+			meander(&goalX, &goalY);
+			defaultBehaviour->x = goalX;
+			defaultBehaviour->y = goalY;
+		}
 		queueThought(defaultBehaviour);
 	}
 
@@ -135,6 +152,7 @@ void Brain::think() {
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
 		//fprintf(stderr, "follow\n");
+		social = nextThought->target->getSocial();
 		if (distSq > BASE_FOLLOW_DIST) {
 			if (_currPath != NULL) {
 				//delete _currPath;
@@ -143,13 +161,14 @@ void Brain::think() {
 			//fprintf(stderr, "%d is target, i am %d\n", nextThought->target, _host);
 			//fprintf(stderr, "%d\n", nextThought->target->getSprite());
 			_currPath = pathFind(nextThought->target->getSprite()->getPosition().x, nextThought->target->getSprite()->getPosition().y);
+		
 			//fprintf(stderr, "end pathfind\n");
 			pathIndex = 0;
 		}
 		//fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		//fprintf(stderr, "move\n");
+		fprintf(stderr, "move\n");
 		if (_currPath != NULL) {
 			//delete _currPath;
 		}
@@ -180,14 +199,29 @@ void Brain::think() {
 			say(nextThought->target);
 			//fprintf(stderr, "did say\n");
 			_thoughtQueue.pop_front();
-			struct order_t* newThought = new order_t;
-			newThought->type = order_type_t::MOVE;
-			int goalX = 0;
-			int goalY = 0;
-			meander(&goalX, &goalY);
-			newThought->x = goalX;
-			newThought->y = goalY;
-			newThought->target = NULL;
+			
+			struct order_t* newThought = new struct order_t;
+
+			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
+			Playable* target = NULL;
+			for (int i = 0; i < _sensedEntities.size(); i++) {
+				if (_sensedEntities.at(i)->getSocial() < social) {
+					target = _sensedEntities.at(i);
+					break;
+				}
+			}
+			newThought->target = target;
+			if (target != NULL) {
+				newThought->type = order_type_t::SAY;
+			}
+			else {
+				newThought->type = order_type_t::MOVE;
+				int goalX = 0;
+				int goalY = 0;
+				meander(&goalX, &goalY);
+				newThought->x = goalX;
+				newThought->y = goalY;
+			}
 			queueThought(newThought);
 		}
 		//fprintf(stderr, "end say\n");
