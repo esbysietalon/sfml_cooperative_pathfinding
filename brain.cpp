@@ -18,7 +18,9 @@ Brain::Brain(Playable* target) {
 	for (int i = 0; i < LMAP_H * LMAP_W; i++) {
 		localMap[i] = 0;
 	}
-	social = distr(generator);
+	social = distr(generator) % 100;
+	randCoeff = distr(generator) / 1000000.0;
+	fprintf(stderr, "%d\n", social);
 }
 void Brain::registerEntity(Playable* entity) {
 	_sensedEntities.emplace(_sensedEntities.end(), entity);
@@ -153,7 +155,7 @@ void Brain::think() {
 	case order_type_t::FOLLOW:
 		//fprintf(stderr, "follow\n");
 		social = nextThought->target->getSocial();
-		if (distSq > BASE_FOLLOW_DIST) {
+		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			if (_currPath != NULL) {
 				//delete _currPath;
 			}
@@ -165,10 +167,11 @@ void Brain::think() {
 			//fprintf(stderr, "end pathfind\n");
 			pathIndex = 0;
 		}
+		
 		//fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		fprintf(stderr, "move\n");
+		//fprintf(stderr, "move\n");
 		if (_currPath != NULL) {
 			//delete _currPath;
 		}

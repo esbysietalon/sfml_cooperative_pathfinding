@@ -237,6 +237,11 @@ void Playable::update_AI()
 		goalAngle = atan2(getSprite()->getPosition().y - currMove->y, getSprite()->getPosition().x - currMove->x);
 		xspeed = -cos(goalAngle);
 		yspeed = -sin(goalAngle);
+		float distSq = (currMove->x - getSprite()->getPosition().x) * (currMove->x - getSprite()->getPosition().x) + (currMove->y - getSprite()->getPosition().y) * (currMove->y - getSprite()->getPosition().y);
+		if (distSq <= BASE_NE_DIST) {
+			xspeed = 0;
+			yspeed = 0;
+		}
 	}
 	//}
 	/*if (currMove != NULL) {
@@ -259,7 +264,8 @@ void Playable::update_AI()
 	}
 	*/
 	//MOVING AND ANIMATING THE SPRITE
-	if(xspeed * xspeed > 0 && yspeed * yspeed > 0){
+	//removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT });
+	if(xspeed * xspeed > 0 || yspeed * yspeed > 0){
 		removeFlags({ animation_t::IDLE, animation_t::FACE_LEFT, animation_t::FACE_RIGHT });
 		if (yspeed != 0) {
 			if(areFlagsSet({animation_t::MOVE_LEFT})){
@@ -276,7 +282,7 @@ void Playable::update_AI()
 		if (xspeed > 0) {
 			addFlags({ animation_t::MOVE_RIGHT});
 			removeFlags({ animation_t::MOVE_LEFT, animation_t::IDLE });
-		}else{
+		}else if(xspeed < 0){
 			addFlags({ animation_t::MOVE_LEFT });
 			removeFlags({ animation_t::MOVE_RIGHT, animation_t::IDLE });
 		}
@@ -284,11 +290,10 @@ void Playable::update_AI()
 		
 	}else{
 		if(areFlagsSet({animation_t::MOVE_LEFT})){
-			removeFlags({ animation_t::MOVE_LEFT });
+			removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT });
 			addFlags({ animation_t::FACE_LEFT });
-		}
-		else if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
-			removeFlags({ animation_t::MOVE_RIGHT });
+		} else if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
+			removeFlags({ animation_t::MOVE_RIGHT, animation_t::MOVE_LEFT, animation_t::FACE_LEFT });
 			addFlags({ animation_t::FACE_RIGHT });
 		}
 	}

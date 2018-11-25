@@ -44,6 +44,7 @@ private:
 	std::deque<order_t*> _thoughtQueue;
 	
 	int social;
+	double randCoeff;
 
 	std::vector<Playable*> _sensedEntities;
 
