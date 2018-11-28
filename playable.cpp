@@ -155,12 +155,12 @@ void Playable::update() {
 			currStep = move_t::NONE;
 		}
 	}
-	if (currStep == move_t::NONE || frameCount > 0) {
-		if (frameCount > 0) {
-			frameCount--;
+	if (currStep == move_t::NONE || bufferFrames > 0) {
+		if (bufferFrames > 0) {
+			bufferFrames--;
 		}
 		if (currStep == move_t::NONE) {
-			frameCount = 1;
+			bufferFrames = 1;
 		}
 		int ver = 0, hor = 0;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {

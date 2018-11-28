@@ -65,5 +65,5 @@ private:
 	double goalAngle = 0;
 	int distSq = 0;
 
-	int frameCount = 0;
+	int bufferFrames = 0;
 };
