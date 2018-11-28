@@ -14,6 +14,8 @@ Playable::Playable(sf::Texture* texture, int w, int h, int x, int y) {
 	_height = h;
 	_x = x;
 	_y = y;
+	moveGoalX = x;
+	moveGoalY = y;
 	setFlagState({ animation_t::IDLE });
 	for (int i = 0; i < MAX_ANIMS; i++) {
 		animations[i] = NULL;
@@ -140,6 +142,47 @@ sf::Sprite* Playable::getSprite()
 void Playable::update() {
 	//CONTROLLING (MOVING) AND ANIMATING PLAYER SPRITE
 	//fprintf(stderr, "player_update\n");
+	if (currStep != move_t::NONE) {
+		distSq = (moveGoalX - _x) * (moveGoalX - _x) + (moveGoalY - _y) * (moveGoalY - _y);
+		if (distSq < 3) {
+			currStep = move_t::NONE;
+			//fprintf(stderr, "%f, %f\n", _x, _y);
+			_x = round(_x / TILE_SIZE) * TILE_SIZE;
+			_y = round(_y / TILE_SIZE) * TILE_SIZE;
+			//fprintf(stderr, "%f, %f\n", _x, _y);
+		}
+		if ((int)_x == (int)moveGoalX && (int)_y == (int)moveGoalY) {
+			currStep = move_t::NONE;
+		}
+	}
+	if (currStep == move_t::NONE || frameCount > 0) {
+		if (frameCount > 0) {
+			frameCount--;
+		}
+		if (currStep == move_t::NONE) {
+			frameCount = 1;
+		}
+		int ver = 0, hor = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			ver++;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			hor--;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			ver--;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			hor++;
+		}
+		currStep = (move_t)(ver + hor * 4);
+		
+		moveGoalX = _x + hor * TILE_SIZE;
+		moveGoalY = _y - ver * TILE_SIZE;
+		//fprintf(stderr, "%d %d\n", hor, ver);
+		//fprintf(stderr, "%d %f %f\n", currStep, moveGoalX, moveGoalY);
+	}
+	
 	if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
 		addFlags({ animation_t::FACE_RIGHT });
 	}
@@ -147,8 +190,8 @@ void Playable::update() {
 		addFlags({ animation_t::FACE_LEFT });
 	}
 	removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT });
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-		_y--;
+	if (currStep == move_t::N) {
+		_y-=SPEED;
 		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
 			addFlags({ animation_t::MOVE_RIGHT });
 			removeFlags({ animation_t::MOVE_LEFT });
@@ -163,13 +206,25 @@ void Playable::update() {
 		removeFlags({ animation_t::IDLE, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		_x--;
+	if (currStep == move_t::W) {
+		_x-= SPEED;
 		addFlags({ animation_t::MOVE_LEFT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-		_y++;
+	if (currStep == move_t::NW) {
+		_y-= 0.707106781 * SPEED;
+		_x-= 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_LEFT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::SW) {
+		_y+= 0.707106781 * SPEED;
+		_x-= 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_LEFT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::S) {
+		_y+= SPEED;
 		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
 			addFlags({ animation_t::MOVE_RIGHT });
 			removeFlags({ animation_t::MOVE_LEFT });
@@ -183,8 +238,20 @@ void Playable::update() {
 		}
 		removeFlags({ animation_t::IDLE, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		_x++;
+	if (currStep == move_t::E) {
+		_x+= SPEED;
+		addFlags({ animation_t::MOVE_RIGHT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::NE) {
+		_y-= 0.707106781 * SPEED;
+		_x+= 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_RIGHT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::SE) {
+		_y+= 0.707106781 * SPEED;
+		_x+= 0.707106781 * SPEED;
 		addFlags({ animation_t::MOVE_RIGHT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
 	}

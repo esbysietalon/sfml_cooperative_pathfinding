@@ -8,3 +8,6 @@
 #define BASE_NE_DIST 256
 #define BASE_LOS_CONE 3.14159 / 4
 #define BASE_FOLLOW_DIST 100
+#define TILE_SIZE 16
+#define SPRITE_SIZE 32
+#define SPEED 2
