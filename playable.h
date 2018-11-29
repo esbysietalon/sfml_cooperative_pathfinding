@@ -39,6 +39,8 @@ public:
 	int getSocial();
 	void queueThought(struct order_t* thought);
 	void interruptThought(struct order_t* thought);
+
+	void see();
 	void registerEntity(Playable* playable);
 	void emptyRegistry();
 private:
@@ -61,6 +63,9 @@ private:
 	
 	sf::Clock actionTimer;
 	void manageAnimations();
+
+	float orientation;
+	float delta_orientation;
 
 	double goalAngle = 0;
 	int distSq = 0;

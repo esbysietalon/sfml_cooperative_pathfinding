@@ -20,7 +20,7 @@ Brain::Brain(Playable* target) {
 	}
 	social = distr(generator) % 100;
 	randCoeff = distr(generator) / 1000000.0;
-	fprintf(stderr, "%d\n", social);
+	//fprintf(stderr, "%d\n", social);
 }
 void Brain::registerEntity(Playable* entity) {
 	_sensedEntities.emplace(_sensedEntities.end(), entity);

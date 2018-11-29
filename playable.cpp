@@ -23,6 +23,8 @@ Playable::Playable(sf::Texture* texture, int w, int h, int x, int y) {
 	animations[getFlagState({ animation_t::IDLE })] = currSprite;
 	brain = new Brain(this);
 	isPlayer = false;
+	delta_orientation = 2 * asin((float)TILE_SIZE / (2 * BASE_SIGHT_RANGE));
+	fprintf(stderr, "%f\n", delta_orientation);
 }
 
 Playable::~Playable()
@@ -46,6 +48,18 @@ int intpow(int base, int exponent) {
 		out *= base;
 	}
 	return out;
+}
+
+void Playable::see() {
+	float currLineAngle;
+	float startX = _x + SPRITE_SIZE / 2;
+	float startY = _y + SPRITE_SIZE / 2;
+	for (currLineAngle = orientation - BASE_LOS_CONE; currLineAngle <= orientation + BASE_LOS_CONE; currLineAngle += delta_orientation) {
+		float endX = _x + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * cos(currLineAngle);
+		float endY = _y + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * sin(currLineAngle);
+		// bresenhamCollision(_x + SPRITE_SIZE / 2, _y + SPRITE_SIZE / 2, endX, endY);
+		
+	}
 }
 
 void Playable::addAnimation(int sx, int sy, int len, animation_t flagSet[]) {
@@ -156,6 +170,8 @@ void Playable::update() {
 		}
 	}
 	if (currStep == move_t::NONE || bufferFrames > 0) {
+		_x = round(_x / TILE_SIZE) * TILE_SIZE;
+		_y = round(_y / TILE_SIZE) * TILE_SIZE;
 		if (bufferFrames > 0) {
 			bufferFrames--;
 		}
