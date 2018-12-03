@@ -5,15 +5,17 @@
 #include "brain.h"
 
 #define MAX_ANIMS 64 // 2 ^ NUM_FLAGS
-
 enum animation_t { IDLE, MOVE_LEFT, MOVE_RIGHT, FACE_LEFT, FACE_RIGHT, BUSY, NUM_FLAGS, INVALID = -1 };
-enum move_t {NONE, N, S = -1, E = 4, W = -4, NE = 5, NW = -3, SE = 3, SW = -5};
+enum move_t { NONE, N, S = -1, E = 4, W = -4, NE = 5, NW = -3, SE = 3, SW = -5 };
+
 
 class Brain;
 
 class Playable {
 
 public:
+	
+
 	Playable();
 	Playable(sf::Texture* texture, int w, int h, int x, int y);
 	~Playable();
@@ -23,6 +25,9 @@ public:
 
 	void update();
 	void update_AI();
+
+	int getX();
+	int getY();
 
 	sf::Sprite* getSprite();
 	void addAnimation(int sx, int sy, int len, animation_t flagSet[]);
@@ -43,6 +48,8 @@ public:
 	void see();
 	void registerEntity(Playable* playable);
 	void emptyRegistry();
+
+	void clipToGrid();
 private:
 	Brain* brain;
 
@@ -59,7 +66,7 @@ private:
 	animation_t _flagSet[NUM_FLAGS];
 
 	move_t currStep = move_t::NONE;
-	float moveGoalX, moveGoalY;
+	int moveGoalX, moveGoalY;
 	
 	sf::Clock actionTimer;
 	void manageAnimations();

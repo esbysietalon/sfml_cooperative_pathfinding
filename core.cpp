@@ -27,7 +27,7 @@ void Core::update() {
 
 void Core::generateNPCs(int num) {
 	for (int i = 0; i < num; i++) {
-		sf::Texture* _npcTexture = graphics->loadImage("resources/sprites/squid_npc_32.png");
+		sf::Texture* _npcTexture = graphics->loadImage("resources/sprites/squid_npc.png");
 		int randX = (rand() % WINDOW_WIDTH) / TILE_SIZE * TILE_SIZE;
 		int randY = (rand() % WINDOW_HEIGHT) / TILE_SIZE * TILE_SIZE;
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);
@@ -57,7 +57,7 @@ void Core::load() {
 		}
 	}
 	//load player sprite
-	sf::Texture* _playerTexture = graphics->loadImage("resources/sprites/squid_player_32.png");
+	sf::Texture* _playerTexture = graphics->loadImage("resources/sprites/squid_player.png");
 	Playable* _player = new Playable(_playerTexture, SPRITE_SIZE, SPRITE_SIZE, WINDOW_WIDTH / 2 / TILE_SIZE * TILE_SIZE, WINDOW_HEIGHT / 2 / TILE_SIZE * TILE_SIZE);
 	
 	//load animations

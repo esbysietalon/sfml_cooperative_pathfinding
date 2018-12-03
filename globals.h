@@ -10,5 +10,5 @@
 #define BASE_SIGHT_RANGE 1000
 #define BASE_FOLLOW_DIST 100
 #define TILE_SIZE 16
-#define SPRITE_SIZE 32
+#define SPRITE_SIZE 16
 #define SPEED 2

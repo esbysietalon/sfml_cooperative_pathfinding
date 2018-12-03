@@ -20,11 +20,13 @@ Brain::Brain(Playable* target) {
 	}
 	social = distr(generator) % 100;
 	randCoeff = distr(generator) / 1000000.0;
+	_currPath = NULL;
 	//fprintf(stderr, "%d\n", social);
 }
 void Brain::registerEntity(Playable* entity) {
 	_sensedEntities.emplace(_sensedEntities.end(), entity);
 }
+/*
 order_t* Brain::nextMove() {
 	if (pathIndex >= _currPath->size()) {
 		return NULL;
@@ -33,31 +35,104 @@ order_t* Brain::nextMove() {
 	//pathIndex++;
 	return move;
 }
-std::vector<order_t*>* Brain::pathFind(int x, int y) {
-	std::vector<order_t*>* path = new std::vector<order_t*>;
+*/
+move_t Brain::nextStep() {
+	move_t step;
+	if (_currPath != NULL && _currPath->size() > 0) {
+		step = _currPath->front();
+		_currPath->pop_front();
+		return step;
+	}
+	else {
+		return (move_t) 0;
+	}
+	//return (move_t) 0;
+}
 
-	int lx = _host->getSprite()->getPosition().x + 0;
-	int ly = _host->getSprite()->getPosition().y + 0;
-	float lAngle = atan2(y - ly, x - lx);
-	float xs = cos(lAngle);
-	float ys = sin(lAngle);
-	float ix = lx;
-	float iy = ly;
-	float distSq = (ix - x) * (ix - x) + (iy - y) * (iy - y);
-	while (distSq > 2) {
-		ix += xs;
-		iy += ys;
-		distSq = (ix - x) * (ix - x) + (iy - y) * (iy - y);
-		if (localMap[((int)(ix) / 16) + (int)(iy)* LMAP_W / 16] != 0) {
-			fprintf(stderr, "obstacle in way\n");
+std::deque<move_t>* Brain::pathFind(int x, int y) {
+	x = (int)round((float)x / TILE_SIZE) * TILE_SIZE;
+	y = (int)round((float)y / TILE_SIZE) * TILE_SIZE;
+	std::deque<move_t>* path = new std::deque<move_t>;
+
+
+	int sx = _host->getX();
+	int sy = _host->getY();
+	//float angle = atan2(y - sy, x - sx);
+	
+	//float xs = cos(angle);
+	//float ys = sin(angle);
+	
+	int dx = x - sx;
+	int dy = y - sy;
+	if (dx == 0 && dy == 0) {
+		return path;
+	}
+	
+	float error = 0.0;
+	move_t move = (move_t)0;
+
+	//bresenham's line algorithm
+
+	if (abs(dx) > abs(dy)) {
+		float de = abs(dy / dx);
+		int ady = 0;
+		if (dy != 0) {
+			ady = -1 * dy / abs(dy);
+		}
+		int inc = (x - sx) / abs(x - sx);
+		for (int i = sx; i != x; i += inc) {
+			error += de;
+			if (error < 0.5) {
+				move = (move_t)(inc * 4);
+			}
+			else {
+				move = (move_t)(inc * 4 + ady);
+				error -= 1.0;
+			}
+			path->push_back(move);
 		}
 	}
-	struct order_t* move = new struct order_t;
-	move->type = order_type_t::MOVE;
-	move->x = x;
-	move->y = y;
-	move->target = NULL;
-	path->emplace(path->end(), move);
+	else {
+		float de = abs(dx / dy);
+		int adx = 0;
+		if (dx != 0) {
+			adx = dx / abs(dx);
+		}
+		int inc = (y - sy) / abs(y - sy);
+		for (int i = sy; i != y; i += inc) {
+			error += de;
+			if (error < 0.5) {
+				move = (move_t)(-1 * inc);
+			}
+			else {
+				move = (move_t)(-1 * inc + 4 * adx);
+				error -= 1.0;
+			}
+			path->push_back(move);
+		}
+	}
+	
+	
+	
+	
+	/*int pathLen = (int)(sqrt((y - sy) * (y - sy) + (x - sx) * (x - sx)));
+	float xs = (x - sx) / pathLen;
+	float ys = (y - sy) / pathLen;
+
+	for (int i = 0; i < pathLen; i++) {
+		cx += xs;
+		cy += ys;
+		if ((int) cx != lx || (int) cy != ly) {
+			int hor = (int) cx - lx;
+			int ver = -((int) cy - ly);
+			lx = (int)cx;
+			ly = (int)cy;
+			move = (move_t)(ver + 4 * hor);
+			path->emplace(path->end(), move);
+		}
+		
+	}*/
+
 	return path;
 }
 
@@ -69,7 +144,7 @@ void Brain::interruptThought(struct order_t* thought) {
 }
 
 void Brain::emptyRegistry() {
-	_sensedEntities.clear();
+	std::vector<Playable*>().swap(_sensedEntities);
 }
 int Brain::getSocial() {
 	return social;
@@ -157,6 +232,9 @@ void Brain::think() {
 		social = nextThought->target->getSocial();
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			if (_currPath != NULL) {
+				std::deque<move_t>().swap(*_currPath);
+				//_currPath->clear();
+				//_currPath->shrink_to_fit();
 				//delete _currPath;
 			}
 			//fprintf(stderr, "pathfind\n");
@@ -173,6 +251,9 @@ void Brain::think() {
 	case order_type_t::MOVE:
 		//fprintf(stderr, "move\n");
 		if (_currPath != NULL) {
+			std::deque<move_t>().swap(*_currPath);
+			//_currPath->clear();
+			//_currPath->shrink_to_fit();
 			//delete _currPath;
 		}
 		_currPath = pathFind(nextThought->x, nextThought->y);
@@ -180,6 +261,7 @@ void Brain::think() {
 			_thoughtQueue.pop_front();
 			struct order_t* newThought = new order_t;
 			newThought->type = order_type_t::MOVE;
+			_host->clipToGrid();
 			int goalX = 0;
 			int goalY = 0;
 			meander(&goalX, &goalY);
@@ -187,16 +269,20 @@ void Brain::think() {
 			newThought->x = goalX;
 			newThought->y = goalY;
 			queueThought(newThought);
+			//fprintf(stderr, "end move\n");
 		}
 		//fprintf(stderr, "end move\n");
 		break;
 	case order_type_t::SAY:
 		//fprintf(stderr, "say\n");
 		if (_currPath != NULL) {
+			std::deque<move_t>().swap(*_currPath);
+			//_currPath->clear();
+			//_currPath->shrink_to_fit();
 			//delete _currPath;
 		}
 		//fprintf(stderr, "path find\n");
-		_currPath = pathFind(nextThought->target->getSprite()->getPosition().x, nextThought->target->getSprite()->getPosition().y);
+		_currPath = pathFind(nextThought->target->getX(), nextThought->target->getY());
 		if (distSq < BASE_HEAR_DIST) {
 			//fprintf(stderr, "do say\n");
 			say(nextThought->target);

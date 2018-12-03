@@ -24,7 +24,8 @@ Playable::Playable(sf::Texture* texture, int w, int h, int x, int y) {
 	brain = new Brain(this);
 	isPlayer = false;
 	delta_orientation = 2 * asin((float)TILE_SIZE / (2 * BASE_SIGHT_RANGE));
-	fprintf(stderr, "%f\n", delta_orientation);
+	currStep = move_t::NONE;
+	//fprintf(stderr, "%f\n", delta_orientation);
 }
 
 Playable::~Playable()
@@ -58,7 +59,20 @@ void Playable::see() {
 		float endX = _x + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * cos(currLineAngle);
 		float endY = _y + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * sin(currLineAngle);
 		// bresenhamCollision(_x + SPRITE_SIZE / 2, _y + SPRITE_SIZE / 2, endX, endY);
-		
+		int roundX = -1;
+		int roundY = -1;
+		int lastX = -1;
+		int lastY = -1;
+		for (int i = 0; i < BASE_SIGHT_RANGE; i++) {
+			float currX = startX + i * (endX - startX) / BASE_SIGHT_RANGE;
+			float currY = startY + i * (endY - startY) / BASE_SIGHT_RANGE;
+			roundX = (int)(currX) / TILE_SIZE * TILE_SIZE;
+			roundY = (int)(currY) / TILE_SIZE * TILE_SIZE;
+			
+			if (roundX != lastX && roundY != lastY) {
+
+			}
+		}
 	}
 }
 
@@ -296,6 +310,16 @@ void Playable::emptyRegistry() {
 	brain->emptyRegistry();
 }
 
+void Playable::clipToGrid() {
+	_x = round(_x / TILE_SIZE) * TILE_SIZE;
+	_y = round(_y / TILE_SIZE) * TILE_SIZE;
+}
+int Playable::getX() {
+	return (int)round(_x / TILE_SIZE) * TILE_SIZE;
+}
+int Playable::getY() {
+	return (int)round(_y / TILE_SIZE) * TILE_SIZE;
+}
 void Playable::update_AI()
 {
 	
@@ -311,9 +335,105 @@ void Playable::update_AI()
 	}*/
 	//fprintf(stderr, "pre-think\n");
 	brain->think();
+	move_t nextStep = brain->nextStep();
+	if (currStep == move_t::NONE) {
+		currStep = nextStep;
+		int hori = round((float)currStep / 4);
+		int vert = currStep - hori * 4;
+		moveGoalX = getX() + hori * TILE_SIZE;
+		moveGoalY = getY() - vert * TILE_SIZE;
+		//fprintf(stderr, "end move\n");
+		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
+	}
+	if (currStep != move_t::NONE) {
+		distSq = (moveGoalX - _x) * (moveGoalX - _x) + (moveGoalY - _y) * (moveGoalY - _y);
+		//fprintf(stderr, "%d\n", distSq);
+		if (distSq < 4) {
+			currStep = move_t::NONE;
+			clipToGrid();
+		}
+	}
+	
+	
+	//fprintf(stderr, "%f %f %d %d %d\n", _x, _y, moveGoalX, moveGoalY, currStep);
+	if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
+		addFlags({ animation_t::FACE_RIGHT });
+	}
+	if (areFlagsSet({ animation_t::MOVE_LEFT })) {
+		addFlags({ animation_t::FACE_LEFT });
+	}
+	removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT });
+	if (currStep == move_t::N) {
+		_y -= SPEED;
+		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
+			addFlags({ animation_t::MOVE_RIGHT });
+			removeFlags({ animation_t::MOVE_LEFT });
+		}
+		else if (areFlagsSet({ animation_t::MOVE_LEFT })) {
+			addFlags({ animation_t::MOVE_LEFT });
+			removeFlags({ animation_t::MOVE_RIGHT });
+		}
+		else {
+			addFlags({ animation_t::MOVE_RIGHT });
+		}
+		removeFlags({ animation_t::IDLE, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+
+	}
+	if (currStep == move_t::W) {
+		_x -= SPEED;
+		addFlags({ animation_t::MOVE_LEFT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::NW) {
+		_y -= 0.707106781 * SPEED;
+		_x -= 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_LEFT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::SW) {
+		_y += 0.707106781 * SPEED;
+		_x -= 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_LEFT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::S) {
+		_y += SPEED;
+		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
+			addFlags({ animation_t::MOVE_RIGHT });
+			removeFlags({ animation_t::MOVE_LEFT });
+		}
+		else if (areFlagsSet({ animation_t::MOVE_LEFT })) {
+			addFlags({ animation_t::MOVE_LEFT });
+			removeFlags({ animation_t::MOVE_RIGHT });
+		}
+		else {
+			addFlags({ animation_t::MOVE_LEFT });
+		}
+		removeFlags({ animation_t::IDLE, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::E) {
+		_x += SPEED;
+		addFlags({ animation_t::MOVE_RIGHT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::NE) {
+		_y -= 0.707106781 * SPEED;
+		_x += 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_RIGHT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	if (currStep == move_t::SE) {
+		_y += 0.707106781 * SPEED;
+		_x += 0.707106781 * SPEED;
+		addFlags({ animation_t::MOVE_RIGHT });
+		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	manageAnimations();
+	currSprite->getSprite()->setPosition(_x, _y);
+	currSprite->update();
 	//fprintf(stderr, "post-think\n");
 	//if (currMove == NULL) {
-	currMove = brain->nextMove();
+	/*currMove = brain->nextMove();
 	//fprintf(stderr, "%d\n", currMove->type);
 	if (currMove != NULL) {
 		//fprintf(stderr, "x: %f, y: %f, goalX: %d, goalY: %d\n", getSprite()->getPosition().x, getSprite()->getPosition().y, currMove->x, currMove->y);
@@ -348,6 +468,7 @@ void Playable::update_AI()
 	*/
 	//MOVING AND ANIMATING THE SPRITE
 	//removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT });
+	/*
 	if(xspeed * xspeed > 0 || yspeed * yspeed > 0){
 		removeFlags({ animation_t::IDLE, animation_t::FACE_LEFT, animation_t::FACE_RIGHT });
 		if (yspeed != 0) {
@@ -382,5 +503,5 @@ void Playable::update_AI()
 	}
 	manageAnimations();
 	currSprite->getSprite()->setPosition(_x, _y);
-	currSprite->update();
+	currSprite->update();*/
 }

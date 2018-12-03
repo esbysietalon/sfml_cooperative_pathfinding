@@ -9,8 +9,10 @@
 
 
 class Playable;
+enum move_t;
 
 enum order_type_t{ MOVE=1, SAY, FOLLOW };
+
 
 struct order_t {
 	order_type_t type;
@@ -23,7 +25,8 @@ public:
 	Brain();
 	~Brain();
 	Brain(Playable* playable);
-	order_t* nextMove();
+	//order_t* nextMove();
+	move_t nextStep();
 	void think();
 	void say(Playable* target);
 	void queueThought(struct order_t* thought);
@@ -37,8 +40,8 @@ public:
 private:
 	Playable* _host;
 	
-	std::vector<order_t*>* pathFind(int x, int y);
-	std::vector<order_t*>* _currPath;
+	std::deque<move_t>* pathFind(int x, int y);
+	std::deque<move_t>* _currPath;
 	int pathIndex;
 	
 	std::deque<order_t*> _thoughtQueue;
