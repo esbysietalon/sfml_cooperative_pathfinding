@@ -8,6 +8,14 @@
 class Graphics;
 class Terrain;
 
+struct intpair {
+	intpair(int i, int j) {
+		x = i;
+		y = j;
+	}
+	int x, y;
+};
+
 class Core {
 public:
 	Core();
@@ -18,6 +26,13 @@ private:
 	void draw(sf::RenderWindow* window);
 	void generateNPCs(int num);
 	void mainLoop();
+	void calculateCFov();
+	void generateCFov();
+
+	std::vector<std::vector<struct intpair>*> cFovRings;
+	
+	std::vector<sf::Sprite*> tokens;
+
 	std::vector<Playable*> characters;
 	Graphics* graphics;
 	Terrain* terrain;

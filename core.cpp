@@ -3,6 +3,7 @@
 #include "graphics.h"
 #include "globals.h"
 #include "terrain.h"
+#include <stdio.h>
 
 void Core::update() {
 	for (size_t i = 0; i < characters.size(); i++) {
@@ -23,6 +24,46 @@ void Core::update() {
 		else
 			characters.at(i)->update_AI();
 	}
+}
+
+void Core::generateCFov() {
+
+}
+void Core::calculateCFov() {
+	std::vector<struct intpair> listed;
+	//FILE* fov_file = fopen("cfov.txt", "w");
+	//fclose(fov_file);
+	//fov_file = fopen("cfov.txt", "a+");
+	for (int rad = 1; rad <= BASE_SIGHT_RANGE; rad++) {
+		//fprintf(fov_file, "\nstd::vector<struct intpair>* newRing%d = new std::vector<struct intpair>();\n", rad);
+		int ringLength = 0;
+		std::vector<struct intpair>* newRing = new std::vector<struct intpair>();
+		for (int y = -rad; y <= rad; y++) {
+			for (int x = -rad; x <= rad; x++) {
+				float dist = sqrt(x * x + y * y);
+				if (floor(dist) <= rad) {
+					struct intpair point(x, y);
+					bool notListed = false;
+					for (int i = 0; i < listed.size(); i++) {
+						if (listed.at(i).x == x && listed.at(i).y == y) {
+							notListed = true;
+							break;
+						}
+					}
+					if (!notListed) {
+						listed.push_back(point);
+						newRing->emplace_back(point);
+						ringLength++;
+						//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
+					}
+				}
+			}
+		}
+		cFovRings.emplace_back(newRing);
+		//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
+		//fprintf(stderr, "%d\n", rad);
+	}
+	//fclose(fov_file);
 }
 
 void Core::generateNPCs(int num) {
@@ -71,6 +112,19 @@ void Core::load() {
 	_player->setControl(true);
 	characters.emplace(characters.end(), _player);
 	
+	calculateCFov();
+	//fov check
+	/*sf::Texture* _fovTexture = graphics->loadImage("resources/tiles/fovtile.png");
+	for (int i = 0; i < cFovRings.size(); i++) {
+		for (int j = 0; j < cFovRings.at(i)->size(); j++) {
+			sf::Sprite* fovsprite = new sf::Sprite;
+			fovsprite->setTexture(*_fovTexture);
+			fovsprite->setPosition(_player->getX() + cFovRings.at(i)->at(j).x * TILE_SIZE, _player->getY() + cFovRings.at(i)->at(j).y * TILE_SIZE);
+			//fprintf(stderr, "x: %d, y: %d\n", _player->getX() + cFovRings.at(i)->at(j).x * TILE_SIZE, _player->getY() + cFovRings.at(i)->at(j).y * TILE_SIZE);
+			tokens.emplace_back(fovsprite);
+		}
+	}*/
+	//fprintf(stderr, "%d\n", tokens.size());
 	//load NPCs
 	generateNPCs(15);
 }
@@ -84,6 +138,9 @@ void Core::draw(sf::RenderWindow* window) {
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
 		(*window).draw(*characters.at(i)->getSprite());
+	}
+	for (size_t i = 0; i < tokens.size(); i++) {
+		(*window).draw(*tokens.at(i));
 	}
 	(*window).display();
 }

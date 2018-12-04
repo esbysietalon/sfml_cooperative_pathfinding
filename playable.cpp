@@ -51,29 +51,11 @@ int intpow(int base, int exponent) {
 	return out;
 }
 
-void Playable::see() {
-	float currLineAngle;
-	float startX = _x + SPRITE_SIZE / 2;
-	float startY = _y + SPRITE_SIZE / 2;
-	for (currLineAngle = orientation - BASE_LOS_CONE; currLineAngle <= orientation + BASE_LOS_CONE; currLineAngle += delta_orientation) {
-		float endX = _x + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * cos(currLineAngle);
-		float endY = _y + SPRITE_SIZE / 2 + BASE_SIGHT_RANGE * sin(currLineAngle);
-		// bresenhamCollision(_x + SPRITE_SIZE / 2, _y + SPRITE_SIZE / 2, endX, endY);
-		int roundX = -1;
-		int roundY = -1;
-		int lastX = -1;
-		int lastY = -1;
-		for (int i = 0; i < BASE_SIGHT_RANGE; i++) {
-			float currX = startX + i * (endX - startX) / BASE_SIGHT_RANGE;
-			float currY = startY + i * (endY - startY) / BASE_SIGHT_RANGE;
-			roundX = (int)(currX) / TILE_SIZE * TILE_SIZE;
-			roundY = (int)(currY) / TILE_SIZE * TILE_SIZE;
-			
-			if (roundX != lastX && roundY != lastY) {
 
-			}
-		}
-	}
+
+void Playable::see() {
+	//implement cfov
+	
 }
 
 void Playable::addAnimation(int sx, int sy, int len, animation_t flagSet[]) {

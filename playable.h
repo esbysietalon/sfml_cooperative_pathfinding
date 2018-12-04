@@ -58,9 +58,11 @@ private:
 	
 	sf::Texture* _texture;
 	int _width, _height;
+
 	float _x, _y;
 	double xspeed = 0, yspeed = 0;
 	struct order_t* currMove = NULL;
+	
 	int prevFlagState = 0;
 	bool isPlayer;
 	animation_t _flagSet[NUM_FLAGS];
@@ -69,7 +71,7 @@ private:
 	int moveGoalX, moveGoalY;
 	
 	sf::Clock actionTimer;
-	void manageAnimations();
+	
 
 	float orientation;
 	float delta_orientation;
@@ -78,4 +80,8 @@ private:
 	int distSq = 0;
 
 	int bufferFrames = 0;
+
+	struct intpair*** cfov;
+
+	void manageAnimations();
 };
