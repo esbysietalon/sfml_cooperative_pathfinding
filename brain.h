@@ -4,8 +4,7 @@
 #include "globals.h"
 #include <random>
 #include <deque>
-#define LMAP_W 65
-#define LMAP_H 37
+
 
 
 class Playable;
@@ -37,20 +36,33 @@ public:
 	void meander(int* x, int* y);
 
 	int getSocial();
+	
+	void see();
+
+	
 private:
+	int memoryMap[LMAP_W * LMAP_H];
+	int sightMap[BASE_SIGHT_RANGE * BASE_SIGHT_RANGE];
+	int lemoryMap[LMAP_W * LMAP_H];
+
+	int lemX = LMAP_W / 2;
+	int lemY = LMAP_H / 2;
+
+	void printLemory();
+	
 	Playable* _host;
 	
 	std::deque<move_t>* pathFind(int x, int y);
 	std::deque<move_t>* _currPath;
 	int pathIndex;
 	
-	std::deque<order_t*> _thoughtQueue;
+	std::deque<order_t*>* _thoughtQueue;
 	
 	int social;
 	double randCoeff;
 
 	std::vector<Playable*> _sensedEntities;
 
-	int localMap[LMAP_W * LMAP_H];
+	
 
 };

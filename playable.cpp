@@ -51,11 +51,12 @@ int intpow(int base, int exponent) {
 	return out;
 }
 
-
+void Playable::setFov(std::vector<std::vector<struct intpair>> fov) {
+	fovRings.swap(fov);
+}
 
 void Playable::see() {
-	//implement cfov
-	
+	brain->see();
 }
 
 void Playable::addAnimation(int sx, int sy, int len, animation_t flagSet[]) {
@@ -293,6 +294,7 @@ void Playable::emptyRegistry() {
 }
 
 void Playable::clipToGrid() {
+	//fprintf(stderr, "SOMEONE CALLED?\n");
 	_x = round(_x / TILE_SIZE) * TILE_SIZE;
 	_y = round(_y / TILE_SIZE) * TILE_SIZE;
 }
@@ -317,6 +319,7 @@ void Playable::update_AI()
 	}*/
 	//fprintf(stderr, "pre-think\n");
 	brain->think();
+	//fprintf(stderr, "post-think\n");
 	move_t nextStep = brain->nextStep();
 	if (currStep == move_t::NONE) {
 		currStep = nextStep;
@@ -327,14 +330,7 @@ void Playable::update_AI()
 		//fprintf(stderr, "end move\n");
 		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
 	}
-	if (currStep != move_t::NONE) {
-		distSq = (moveGoalX - _x) * (moveGoalX - _x) + (moveGoalY - _y) * (moveGoalY - _y);
-		//fprintf(stderr, "%d\n", distSq);
-		if (distSq < 4) {
-			currStep = move_t::NONE;
-			clipToGrid();
-		}
-	}
+	
 	
 	
 	//fprintf(stderr, "%f %f %d %d %d\n", _x, _y, moveGoalX, moveGoalY, currStep);
@@ -409,6 +405,15 @@ void Playable::update_AI()
 		_x += 0.707106781 * SPEED;
 		addFlags({ animation_t::MOVE_RIGHT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
+	}
+	if (currStep != move_t::NONE) {
+		distSq = (moveGoalX - _x) * (moveGoalX - _x) + (moveGoalY - _y) * (moveGoalY - _y);
+		//fprintf(stderr, "%d\n", distSq);
+		if (distSq <= 4) {
+			//fprintf(stderr, "CLIP %d\n", distSq);
+			currStep = move_t::NONE;
+			clipToGrid();
+		}
 	}
 	manageAnimations();
 	currSprite->getSprite()->setPosition(_x, _y);

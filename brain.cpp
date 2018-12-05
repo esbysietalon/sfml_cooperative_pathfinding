@@ -11,16 +11,49 @@ Brain::Brain() {
 Brain::~Brain() {
 
 }
+
+void Brain::see() {
+	//implement cfov
+	//reset sightmaps
+	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
+	//fprintf(stderr, "i can see\n");
+	for (int i = 0; i < BASE_SIGHT_RANGE * BASE_SIGHT_RANGE; i++) {
+		sightMap[i] = 0;
+	}
+	//check in rings of sight around playable
+	for (int i = 0; i < _host->fovRings.size(); i++) {
+		for (int j = 0; j < _host->fovRings.at(i).size(); j++) {
+			int x = _host->fovRings.at(i).at(j).x;
+			int y = _host->fovRings.at(i).at(j).y;
+			//fprintf(stderr, "%d  and  %d\n", x, y);
+			sightMap[(x + BASE_SIGHT_RANGE / 2) + (y + BASE_SIGHT_RANGE / 2) * LMAP_W] = 1;
+			lemX = _host->getX() / TILE_SIZE;
+			lemY = _host->getY() / TILE_SIZE;
+			int lX = lemX + x;
+			int lY = lemY + y;
+			if (lX >= 0 && lX < LMAP_W) {
+				if (lY >= 0 && lY < LMAP_H) {
+					lemoryMap[lX + lY * LMAP_W] = 1;
+				}
+			}
+		}
+	}
+	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
+}
 Brain::Brain(Playable* target) {
 	//srand(time(0));
 	_host = target;
 	pathIndex = 0;
 	for (int i = 0; i < LMAP_H * LMAP_W; i++) {
-		localMap[i] = 0;
+		sightMap[i] = 0;
+		lemoryMap[i] = 0;
+		memoryMap[i] = 0;
 	}
 	social = distr(generator) % 100;
 	randCoeff = distr(generator) / 1000000.0;
 	_currPath = NULL;
+	_thoughtQueue = new std::deque<order_t*>();
+	//printLemory();
 	//fprintf(stderr, "%d\n", social);
 }
 void Brain::registerEntity(Playable* entity) {
@@ -137,14 +170,18 @@ std::deque<move_t>* Brain::pathFind(int x, int y) {
 }
 
 void Brain::queueThought(struct order_t* thought) {
-	_thoughtQueue.push_back(thought);
+	//fprintf(stderr, "queueing thought\n");
+	_thoughtQueue->push_back(thought);
 }
 void Brain::interruptThought(struct order_t* thought) {
-	_thoughtQueue.push_front(thought);
+	//fprintf(stderr, "interrupting thought\n");
+	_thoughtQueue->push_front(thought);
 }
 
 void Brain::emptyRegistry() {
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
 	std::vector<Playable*>().swap(_sensedEntities);
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
 }
 int Brain::getSocial() {
 	return social;
@@ -183,20 +220,36 @@ void Brain::meander(int* goalX, int* goalY) {
 		*goalX = WINDOW_WIDTH - 1;
 	if (*goalY >= WINDOW_HEIGHT)
 		*goalY = WINDOW_HEIGHT - 1;
+	*goalX = round(*goalX / TILE_SIZE) * TILE_SIZE;
+	*goalY = round(*goalY / TILE_SIZE) * TILE_SIZE;
 }
 
+void Brain::printLemory() {
+	for (int i = 0; i < LMAP_H; i++) {
+		for (int j = 0; j < LMAP_W; j++) {
+			fprintf(stderr, "%d ", lemoryMap[j + i * LMAP_W]);
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n\n\n");
+}
 void Brain::think() {
 	//fprintf(stderr, "default-behavior\n");
-	if (_thoughtQueue.size() == 0) {
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
+
+	if (_thoughtQueue->size() == 0) {
 		//fprintf(stderr, "default behavior\n");
 		struct order_t* defaultBehaviour = new struct order_t;
-		
-		std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
 		Playable* defaultTarget = NULL;
-		for (int i = 0; i < _sensedEntities.size(); i++) {
-			if (_sensedEntities.at(i)->getSocial() < social) {
-				defaultTarget = _sensedEntities.at(i);
-				break;
+		if (_sensedEntities.size() > 0) {
+			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
+
+			
+			for (int i = 0; i < _sensedEntities.size(); i++) {
+				if (_sensedEntities.at(i)->getSocial() < social) {
+					defaultTarget = _sensedEntities.at(i);
+					break;
+				}
 			}
 		}
 		defaultBehaviour->target = defaultTarget;
@@ -211,19 +264,23 @@ void Brain::think() {
 			defaultBehaviour->x = goalX;
 			defaultBehaviour->y = goalY;
 		}
+		//fprintf(stderr, "%d\n", defaultBehaviour->type);
 		queueThought(defaultBehaviour);
 	}
 
 	//fprintf(stderr, "i am %d next thought\n", _host);
-	struct order_t* nextThought = _thoughtQueue.front();
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
+	struct order_t* nextThought = _thoughtQueue->front();
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
 	float distSq = 0;
 	if (nextThought->target != NULL) {
 		//fprintf(stderr, "non-NULL target\n");
-		distSq = (nextThought->target->getSprite()->getPosition().x - _host->getSprite()->getPosition().x) * (nextThought->target->getSprite()->getPosition().x - _host->getSprite()->getPosition().x) + (nextThought->target->getSprite()->getPosition().y - _host->getSprite()->getPosition().y) * (nextThought->target->getSprite()->getPosition().y - _host->getSprite()->getPosition().y);
+		distSq = (nextThought->target->getX() - _host->getX()) * (nextThought->target->getX() - _host->getX()) + (nextThought->target->getY() - _host->getY()) * (nextThought->target->getY() - _host->getY());
 	}
 	else {
 		//fprintf(stderr, "NULL target\n");
-		distSq = (nextThought->x - _host->getSprite()->getPosition().x) * (nextThought->x - _host->getSprite()->getPosition().x) + (nextThought->y - _host->getSprite()->getPosition().y) * (nextThought->y - _host->getSprite()->getPosition().y);
+		//fprintf(stderr, "them: %d %d me: %d %d\n", nextThought->x, nextThought->y, _host->getX(), _host->getY());
+		distSq = (nextThought->x - _host->getX()) * (nextThought->x - _host->getX()) + (nextThought->y - _host->getY()) * (nextThought->y - _host->getY());
 	}
 	//fprintf(stderr, "retrieved next thought\n");
 	switch (nextThought->type) {
@@ -257,11 +314,14 @@ void Brain::think() {
 			//delete _currPath;
 		}
 		_currPath = pathFind(nextThought->x, nextThought->y);
-		if (distSq < BASE_NE_DIST) {
-			_thoughtQueue.pop_front();
+		//fprintf(stderr, "distSq %f\n", distSq);
+		if (distSq <= BASE_NE_DIST) {
+			//printLemory();
+			//fprintf(stderr, "move again\n");
+			_thoughtQueue->pop_front();
 			struct order_t* newThought = new order_t;
 			newThought->type = order_type_t::MOVE;
-			_host->clipToGrid();
+			//_host->clipToGrid();
 			int goalX = 0;
 			int goalY = 0;
 			meander(&goalX, &goalY);
@@ -287,7 +347,7 @@ void Brain::think() {
 			//fprintf(stderr, "do say\n");
 			say(nextThought->target);
 			//fprintf(stderr, "did say\n");
-			_thoughtQueue.pop_front();
+			_thoughtQueue->pop_front();
 			
 			struct order_t* newThought = new struct order_t;
 

@@ -8,18 +8,14 @@
 class Graphics;
 class Terrain;
 
-struct intpair {
-	intpair(int i, int j) {
-		x = i;
-		y = j;
-	}
-	int x, y;
-};
 
 class Core {
 public:
 	Core();
 	~Core();
+
+	std::vector<std::vector<struct intpair>> cFovRings;
+
 private:
 	void update();
 	void load();
@@ -29,7 +25,10 @@ private:
 	void calculateCFov();
 	void generateCFov();
 
-	std::vector<std::vector<struct intpair>*> cFovRings;
+	
+
+	
+
 	
 	std::vector<sf::Sprite*> tokens;
 

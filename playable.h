@@ -8,6 +8,13 @@
 enum animation_t { IDLE, MOVE_LEFT, MOVE_RIGHT, FACE_LEFT, FACE_RIGHT, BUSY, NUM_FLAGS, INVALID = -1 };
 enum move_t { NONE, N, S = -1, E = 4, W = -4, NE = 5, NW = -3, SE = 3, SW = -5 };
 
+struct intpair {
+	intpair(int i, int j) {
+		x = i;
+		y = j;
+	}
+	int x, y;
+};
 
 class Brain;
 
@@ -49,9 +56,14 @@ public:
 	void registerEntity(Playable* playable);
 	void emptyRegistry();
 
-	void clipToGrid();
+	
+
+	void setFov(std::vector<std::vector<struct intpair>> fov);
+	std::vector<std::vector<struct intpair>> fovRings;
 private:
 	Brain* brain;
+
+	void clipToGrid();
 
 	AnimSprite* currSprite;
 	AnimSprite* animations[MAX_ANIMS];
@@ -78,6 +90,8 @@ private:
 
 	double goalAngle = 0;
 	int distSq = 0;
+
+	
 
 	int bufferFrames = 0;
 

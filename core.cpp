@@ -7,22 +7,16 @@
 
 void Core::update() {
 	for (size_t i = 0; i < characters.size(); i++) {
+		//fprintf(stderr, "%d - i\n", i);
 		characters.at(i)->emptyRegistry();
-		for (size_t j = 0; j < characters.size(); j++) {
-			//registering entities
-			//fprintf(stderr, "%d %d\n", i, j);
-			if (i != j) {	
-				//int distSq = rand() % 1000000;
-				//if (distSq < 10000) {
-					characters.at(i)->registerEntity(characters.at(j));
-				//}
-			}
-			//fprintf(stderr, "%d %d\n", i, j);
-		}
+		characters.at(i)->see();
+		
 		if (characters.at(i)->isControlled())
 			characters.at(i)->update();
 		else
 			characters.at(i)->update_AI();
+		
+		//fprintf(stderr, "%d - i\n", i);
 	}
 }
 
@@ -39,7 +33,7 @@ void Core::calculateCFov() {
 		int ringLength = 0;
 		int skipDist = (int)((rad / sqrt(2)));
 		//fprintf(stderr, "%d, %d\n", rad, skipDist);
-		std::vector<struct intpair>* newRing = new std::vector<struct intpair>();
+		std::vector<struct intpair> newRing;
 		int loops = 0;
 		for (int y = -rad; y <= rad; y++) {
 			for (int x = -rad; x <= rad; x++) {
@@ -70,7 +64,7 @@ void Core::calculateCFov() {
 					}
 					if (!notListed) {
 						listed.push_back(point);
-						newRing->emplace_back(point);
+						newRing.emplace_back(point);
 						ringLength++;
 						//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
 					}
@@ -93,6 +87,8 @@ void Core::generateNPCs(int num) {
 		int randY = (rand() % WINDOW_HEIGHT) / TILE_SIZE * TILE_SIZE;
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);
 		
+		_npc->setFov(cFovRings);
+
 		_npc->addAnimation(0, 0, 0, { animation_t::IDLE });
 		_npc->addAnimation(0, 1, 6, { animation_t::MOVE_RIGHT });
 		_npc->addAnimation(0, 0, 6, { animation_t::MOVE_LEFT });
@@ -103,7 +99,8 @@ void Core::generateNPCs(int num) {
 }
 void Core::load() {
 	//load floor
-	
+	calculateCFov();
+
 	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES; i++) {
 		std::string filePath = "resources/tiles/floor_"+ std::to_string(i+1) +".png";
 		sf::Texture* _tileTexture = graphics->loadImage(filePath);
@@ -121,6 +118,8 @@ void Core::load() {
 	sf::Texture* _playerTexture = graphics->loadImage("resources/sprites/squid_player.png");
 	Playable* _player = new Playable(_playerTexture, SPRITE_SIZE, SPRITE_SIZE, WINDOW_WIDTH / 2 / TILE_SIZE * TILE_SIZE, WINDOW_HEIGHT / 2 / TILE_SIZE * TILE_SIZE);
 	
+	_player->setFov(cFovRings);
+
 	//load animations
 	_player->addAnimation(0, 1, 6, { animation_t::MOVE_RIGHT });
 	_player->addAnimation(0, 0, 6, { animation_t::MOVE_LEFT });
@@ -132,7 +131,7 @@ void Core::load() {
 	_player->setControl(true);
 	characters.emplace(characters.end(), _player);
 	
-	calculateCFov();
+	
 	//fov check
 	/*sf::Texture* _fovTexture = graphics->loadImage("resources/tiles/fovtile.png");
 	for (int i = 0; i < cFovRings.size(); i++) {
@@ -146,14 +145,15 @@ void Core::load() {
 	}*/
 	//fprintf(stderr, "%d\n", tokens.size());
 	//load NPCs
-	generateNPCs(15);
+	generateNPCs(NPC_NUM);
 }
 
 void Core::draw(sf::RenderWindow* window) {
 	(*window).clear(sf::Color::Black);
 	for (int j = 0; j < MAP_HEIGHT; j++) {
 		for (int i = 0; i < MAP_WIDTH; i++) {
-			window->draw(*map[i + j * MAP_WIDTH]);
+
+			window->draw(*(map[i + j * MAP_WIDTH]));
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
