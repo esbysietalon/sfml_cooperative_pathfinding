@@ -34,14 +34,32 @@ void Core::calculateCFov() {
 	//FILE* fov_file = fopen("cfov.txt", "w");
 	//fclose(fov_file);
 	//fov_file = fopen("cfov.txt", "a+");
-	for (int rad = 1; rad <= BASE_SIGHT_RANGE; rad++) {
+	for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 		//fprintf(fov_file, "\nstd::vector<struct intpair>* newRing%d = new std::vector<struct intpair>();\n", rad);
 		int ringLength = 0;
+		int skipDist = (int)((rad / sqrt(2)));
+		//fprintf(stderr, "%d, %d\n", rad, skipDist);
 		std::vector<struct intpair>* newRing = new std::vector<struct intpair>();
+		int loops = 0;
 		for (int y = -rad; y <= rad; y++) {
 			for (int x = -rad; x <= rad; x++) {
+				loops++;
+				if (rad > skipDist && y >= -skipDist && y <= skipDist) {
+					if (x >= -skipDist && x <= skipDist) {				
+						x = skipDist;
+						continue;
+					}
+				}
 				float dist = sqrt(x * x + y * y);
-				if (floor(dist) <= rad) {
+				if (floor(dist) > rad) {
+					if (x < 0)
+						continue;
+						//x += floor(sqrt((dist - rad) * (dist - rad) - y * y * (dist - rad) / (float)dist));
+					else
+						x = rad;
+					continue;
+				}
+				//if (floor(dist) <= rad) {
 					struct intpair point(x, y);
 					bool notListed = false;
 					for (int i = 0; i < listed.size(); i++) {
@@ -56,13 +74,15 @@ void Core::calculateCFov() {
 						ringLength++;
 						//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
 					}
-				}
+				//}
 			}
 		}
+		//fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
 		cFovRings.emplace_back(newRing);
 		//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
 		//fprintf(stderr, "%d\n", rad);
 	}
+	//fprintf(stderr, "%d", skippedLoops);
 	//fclose(fov_file);
 }
 
