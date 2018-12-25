@@ -8,6 +8,7 @@
 class Graphics;
 class Terrain;
 
+enum rmap{ EMPTY, TERRAIN, ACTOR, LEGEND_LEN };
 
 class Core {
 public:
@@ -36,4 +37,6 @@ private:
 	Graphics* graphics;
 	Terrain* terrain;
 	sf::Sprite** map;
+
+	Playable** rMap;
 };

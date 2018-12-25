@@ -38,12 +38,13 @@ public:
 	int getSocial();
 	
 	void see();
-
+	void setRMap(Playable*** rMap);
 	
 private:
 	int memoryMap[LMAP_W * LMAP_H];
-	int sightMap[BASE_SIGHT_RANGE * BASE_SIGHT_RANGE];
-	int lemoryMap[LMAP_W * LMAP_H];
+	Playable* sightMap[4 * (BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1)];
+	Playable* lemoryMap[LMAP_W * LMAP_H];
+	Playable*** rmap;
 
 	int lemX = LMAP_W / 2;
 	int lemY = LMAP_H / 2;

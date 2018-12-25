@@ -12,28 +12,48 @@ Brain::~Brain() {
 
 }
 
+void Brain::setRMap(Playable*** rMap) {
+	rmap = rMap;
+}
+
 void Brain::see() {
+	
 	//implement cfov
 	//reset sightmaps
 	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
 	//fprintf(stderr, "i can see\n");
-	for (int i = 0; i < BASE_SIGHT_RANGE * BASE_SIGHT_RANGE; i++) {
+	for (int i = 0; i < 4 * (BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1); i++) {
 		sightMap[i] = 0;
 	}
 	//check in rings of sight around playable
 	for (int i = 0; i < _host->fovRings.size(); i++) {
+		std::vector<intpair> currRing = _host->fovRings.at(i);
 		for (int j = 0; j < _host->fovRings.at(i).size(); j++) {
-			int x = _host->fovRings.at(i).at(j).x;
-			int y = _host->fovRings.at(i).at(j).y;
+			intpair currPair = currRing.at(j);
+			int x = currPair.x;
+			int y = currPair.y;
 			//fprintf(stderr, "%d  and  %d\n", x, y);
-			sightMap[(x + BASE_SIGHT_RANGE / 2) + (y + BASE_SIGHT_RANGE / 2) * LMAP_W] = 1;
+			int cx = x + _host->getX() / TILE_SIZE;
+			int cy = y + _host->getY() / TILE_SIZE;
+			int smx = (x + BASE_SIGHT_RANGE);
+			int smy = (y + BASE_SIGHT_RANGE);
+			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
+				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
+				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)1) {
+					_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
+				}
+				//fprintf(stderr, "x: %d y: %d xlim: %d ylim: %d\n", (x + BASE_SIGHT_RANGE), (y + BASE_SIGHT_RANGE), 2 * (BASE_SIGHT_RANGE + 1), 2 * (BASE_SIGHT_RANGE + 1));
+			}
+			else {
+				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (Playable*)1;
+			}
 			lemX = _host->getX() / TILE_SIZE;
 			lemY = _host->getY() / TILE_SIZE;
 			int lX = lemX + x;
 			int lY = lemY + y;
 			if (lX >= 0 && lX < LMAP_W) {
 				if (lY >= 0 && lY < LMAP_H) {
-					lemoryMap[lX + lY * LMAP_W] = 1;
+					lemoryMap[lX + lY * LMAP_W] = sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)];
 				}
 			}
 		}
@@ -45,7 +65,7 @@ Brain::Brain(Playable* target) {
 	_host = target;
 	pathIndex = 0;
 	for (int i = 0; i < LMAP_H * LMAP_W; i++) {
-		sightMap[i] = 0;
+		//sightMap[i] = 0;
 		lemoryMap[i] = 0;
 		memoryMap[i] = 0;
 	}
@@ -53,8 +73,9 @@ Brain::Brain(Playable* target) {
 	randCoeff = distr(generator) / 1000000.0;
 	_currPath = NULL;
 	_thoughtQueue = new std::deque<order_t*>();
+	
 	//printLemory();
-	//fprintf(stderr, "%d\n", social);
+	
 }
 void Brain::registerEntity(Playable* entity) {
 	_sensedEntities.emplace(_sensedEntities.end(), entity);
@@ -316,7 +337,9 @@ void Brain::think() {
 		_currPath = pathFind(nextThought->x, nextThought->y);
 		//fprintf(stderr, "distSq %f\n", distSq);
 		if (distSq <= BASE_NE_DIST) {
+			
 			//printLemory();
+			
 			//fprintf(stderr, "move again\n");
 			_thoughtQueue->pop_front();
 			struct order_t* newThought = new order_t;

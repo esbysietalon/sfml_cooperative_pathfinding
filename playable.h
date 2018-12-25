@@ -56,12 +56,13 @@ public:
 	void registerEntity(Playable* playable);
 	void emptyRegistry();
 
-	
+	void setRMap(Playable***);
 
 	void setFov(std::vector<std::vector<struct intpair>> fov);
 	std::vector<std::vector<struct intpair>> fovRings;
 private:
 	Brain* brain;
+
 
 	void clipToGrid();
 

@@ -42,6 +42,10 @@ void Playable::setControl(bool control)
 	isPlayer = control;
 }
 
+void Playable::setRMap(Playable*** rMap) {
+	brain->setRMap(rMap);
+}
+
 int intpow(int base, int exponent) {
 	int out = 1;
 	while (exponent > 0) {

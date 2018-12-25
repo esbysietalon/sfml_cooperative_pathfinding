@@ -6,7 +6,13 @@
 #include <stdio.h>
 
 void Core::update() {
+	for (int j = 0; j < MAP_HEIGHT; j++) {
+		for (int i = 0; i < MAP_WIDTH; i++) {
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::TERRAIN : rmap::EMPTY);
+		}
+	}
 	for (size_t i = 0; i < characters.size(); i++) {
+		rMap[characters.at(i)->getX() / TILE_SIZE + characters.at(i)->getY() / TILE_SIZE * MAP_WIDTH] = (characters.at(i));
 		//fprintf(stderr, "%d - i\n", i);
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
@@ -20,9 +26,6 @@ void Core::update() {
 	}
 }
 
-void Core::generateCFov() {
-
-}
 void Core::calculateCFov() {
 	std::vector<struct intpair> listed;
 	//FILE* fov_file = fopen("cfov.txt", "w");
@@ -88,7 +91,7 @@ void Core::generateNPCs(int num) {
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);
 		
 		_npc->setFov(cFovRings);
-
+		_npc->setRMap(&rMap);
 		_npc->addAnimation(0, 0, 0, { animation_t::IDLE });
 		_npc->addAnimation(0, 1, 6, { animation_t::MOVE_RIGHT });
 		_npc->addAnimation(0, 0, 6, { animation_t::MOVE_LEFT });
@@ -98,9 +101,12 @@ void Core::generateNPCs(int num) {
 	}
 }
 void Core::load() {
-	//load floor
+	//calculate fov
 	calculateCFov();
 
+	rMap = (Playable**)malloc(sizeof(Playable*) * MAP_HEIGHT * MAP_WIDTH);
+	
+	//load floor
 	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES; i++) {
 		std::string filePath = "resources/tiles/floor_"+ std::to_string(i+1) +".png";
 		sf::Texture* _tileTexture = graphics->loadImage(filePath);
@@ -112,6 +118,7 @@ void Core::load() {
 			map[i + j * MAP_WIDTH] = new sf::Sprite;
 			map[i + j * MAP_WIDTH]->setTexture(*(terrain->getTileTAt(i, j)));
 			map[i + j * MAP_WIDTH]->setPosition(i * 16, j * 16);
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::TERRAIN : rmap::EMPTY);
 		}
 	}
 	//load player sprite
@@ -127,7 +134,7 @@ void Core::load() {
 	_player->addAnimation(0, 1, 0, { animation_t::FACE_RIGHT });
 	
 	//place player into update cycle
-
+	_player->setRMap(&rMap);
 	_player->setControl(true);
 	characters.emplace(characters.end(), _player);
 	
