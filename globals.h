@@ -16,5 +16,6 @@
 #define SPRITE_SIZE 16
 #define SPEED 2
 #define NPC_NUM 15
+#define MAX_ANIMS 64 // 2 ^ NUM_FLAGS
 
 

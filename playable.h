@@ -3,18 +3,13 @@
 #include "stdafx.h"
 #include "animatedsprite.h"
 #include "brain.h"
+#include "globals.h"
+#include "intpair.h"
 
-#define MAX_ANIMS 64 // 2 ^ NUM_FLAGS
 enum animation_t { IDLE, MOVE_LEFT, MOVE_RIGHT, FACE_LEFT, FACE_RIGHT, BUSY, NUM_FLAGS, INVALID = -1 };
 enum move_t { NONE, N, S = -1, E = 4, W = -4, NE = 5, NW = -3, SE = 3, SW = -5 };
 
-struct intpair {
-	intpair(int i, int j) {
-		x = i;
-		y = j;
-	}
-	int x, y;
-};
+
 
 class Brain;
 

@@ -2,10 +2,9 @@
 #include "stdafx.h"
 #include "playable.h"
 #include "globals.h"
+#include "dstarlite.h"
 #include <random>
 #include <deque>
-
-
 
 class Playable;
 enum move_t;
