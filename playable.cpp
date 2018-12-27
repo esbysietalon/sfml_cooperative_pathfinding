@@ -324,9 +324,8 @@ void Playable::update_AI()
 	//fprintf(stderr, "pre-think\n");
 	brain->think();
 	//fprintf(stderr, "post-think\n");
-	move_t nextStep = brain->nextStep();
 	if (currStep == move_t::NONE) {
-		currStep = nextStep;
+		currStep = brain->nextStep();
 		int hori = round((float)currStep / 4);
 		int vert = currStep - hori * 4;
 		moveGoalX = getX() + hori * TILE_SIZE;
@@ -334,7 +333,7 @@ void Playable::update_AI()
 		//fprintf(stderr, "end move\n");
 		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
 	}
-	
+	fprintf(stderr, "currstep is %d\n", currStep);
 	
 	
 	//fprintf(stderr, "%f %f %d %d %d\n", _x, _y, moveGoalX, moveGoalY, currStep);

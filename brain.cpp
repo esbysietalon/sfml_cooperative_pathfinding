@@ -40,7 +40,7 @@ void Brain::see() {
 			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
 				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
 				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)1) {
-					_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
+					//_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
 				}
 				//fprintf(stderr, "x: %d y: %d xlim: %d ylim: %d\n", (x + BASE_SIGHT_RANGE), (y + BASE_SIGHT_RANGE), 2 * (BASE_SIGHT_RANGE + 1), 2 * (BASE_SIGHT_RANGE + 1));
 			}
@@ -62,6 +62,10 @@ void Brain::see() {
 }
 Brain::Brain(Playable* target) {
 	//srand(time(0));
+
+	lemoryMap = new Playable*[LMAP_W * LMAP_H];
+	sightMap = new Playable*[4 * (BASE_SIGHT_RANGE + 1) * (BASE_SIGHT_RANGE + 1)];
+
 	_host = target;
 	pathIndex = 0;
 	for (int i = 0; i < LMAP_H * LMAP_W; i++) {
@@ -74,6 +78,8 @@ Brain::Brain(Playable* target) {
 	_currPath = NULL;
 	_thoughtQueue = new std::deque<order_t*>();
 	
+	memGraph = new Graph(&lemoryMap, LMAP_W, LMAP_H, _host);
+	pf = new PathFinder(memGraph);
 	//printLemory();
 	
 }
@@ -91,8 +97,9 @@ order_t* Brain::nextMove() {
 }
 */
 move_t Brain::nextStep() {
+	fprintf(stderr, "request next step\n");
 	move_t step;
-	if (_currPath != NULL && _currPath->size() > 0) {
+	if (_currPath != NULL && !_currPath->empty()) {
 		step = _currPath->front();
 		_currPath->pop_front();
 		return step;
@@ -104,9 +111,13 @@ move_t Brain::nextStep() {
 }
 
 std::deque<move_t>* Brain::pathFind(int x, int y) {
-	x = (int)round((float)x / TILE_SIZE) * TILE_SIZE;
-	y = (int)round((float)y / TILE_SIZE) * TILE_SIZE;
-	std::deque<move_t>* path = new std::deque<move_t>;
+	x = (int)round((float)x / TILE_SIZE);
+	y = (int)round((float)y / TILE_SIZE);
+	int sx = _host->getX() / TILE_SIZE;
+	int sy = _host->getY() / TILE_SIZE;
+	
+	return pf->findPath(intpair(sx, sy), intpair(x, y));
+	/*std::deque<move_t>* path = new std::deque<move_t>;
 
 
 	int sx = _host->getX();
@@ -187,7 +198,7 @@ std::deque<move_t>* Brain::pathFind(int x, int y) {
 		
 	}*/
 
-	return path;
+	
 }
 
 void Brain::queueThought(struct order_t* thought) {
@@ -257,7 +268,8 @@ void Brain::printLemory() {
 void Brain::think() {
 	//fprintf(stderr, "default-behavior\n");
 	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
-
+	if(_currPath != NULL)
+		fprintf(stderr, "path size is currently %d\n", _currPath->size());
 	if (_thoughtQueue->size() == 0) {
 		//fprintf(stderr, "default behavior\n");
 		struct order_t* defaultBehaviour = new struct order_t;
@@ -306,7 +318,7 @@ void Brain::think() {
 	//fprintf(stderr, "retrieved next thought\n");
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
-		//fprintf(stderr, "follow\n");
+		fprintf(stderr, "follow\n");
 		social = nextThought->target->getSocial();
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			if (_currPath != NULL) {
@@ -327,20 +339,24 @@ void Brain::think() {
 		//fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		//fprintf(stderr, "move\n");
-		if (_currPath != NULL) {
+		fprintf(stderr, "move\n");
+		/*if (_currPath != NULL) {
 			std::deque<move_t>().swap(*_currPath);
 			//_currPath->clear();
 			//_currPath->shrink_to_fit();
 			//delete _currPath;
+		}*/
+		if (_currPath == NULL || _currPath->empty()) {
+			fprintf(stderr, "path empty - recalculate\n");
+			_currPath = pathFind(nextThought->x, nextThought->y);
 		}
-		_currPath = pathFind(nextThought->x, nextThought->y);
 		//fprintf(stderr, "distSq %f\n", distSq);
 		if (distSq <= BASE_NE_DIST) {
 			
 			//printLemory();
-			
-			//fprintf(stderr, "move again\n");
+			if(_currPath != NULL)
+				_currPath->clear();
+			fprintf(stderr, "move again\n");
 			_thoughtQueue->pop_front();
 			struct order_t* newThought = new order_t;
 			newThought->type = order_type_t::MOVE;
@@ -357,7 +373,7 @@ void Brain::think() {
 		//fprintf(stderr, "end move\n");
 		break;
 	case order_type_t::SAY:
-		//fprintf(stderr, "say\n");
+		fprintf(stderr, "say\n");
 		if (_currPath != NULL) {
 			std::deque<move_t>().swap(*_currPath);
 			//_currPath->clear();

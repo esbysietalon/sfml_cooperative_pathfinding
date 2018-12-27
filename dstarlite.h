@@ -17,6 +17,7 @@ public:
 	~PathFinder();
 
 	std::deque<move_t>* findPath(intpair start, intpair end);
+	void reset();
 private:
 	void updateVertex(vertEntry u);
 	void updateVertex(intpair s);

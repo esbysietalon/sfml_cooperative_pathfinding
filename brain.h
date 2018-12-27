@@ -7,6 +7,9 @@
 #include <deque>
 
 class Playable;
+class Graph;
+class PathFinder;
+
 enum move_t;
 
 enum order_type_t{ MOVE=1, SAY, FOLLOW };
@@ -41,8 +44,8 @@ public:
 	
 private:
 	int memoryMap[LMAP_W * LMAP_H];
-	Playable* sightMap[4 * (BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1)];
-	Playable* lemoryMap[LMAP_W * LMAP_H];
+	Playable** sightMap;
+	Playable** lemoryMap;
 	Playable*** rmap;
 
 	int lemX = LMAP_W / 2;
@@ -63,6 +66,8 @@ private:
 
 	std::vector<Playable*> _sensedEntities;
 
+	Graph* memGraph;
+	PathFinder* pf;
 	
 
 };

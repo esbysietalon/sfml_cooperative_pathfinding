@@ -9,11 +9,11 @@
 void Core::update() {
 	for (int j = 0; j < MAP_HEIGHT; j++) {
 		for (int i = 0; i < MAP_WIDTH; i++) {
-			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::TERRAIN : rmap::EMPTY);
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
-		rMap[characters.at(i)->getX() / TILE_SIZE + characters.at(i)->getY() / TILE_SIZE * MAP_WIDTH] = (characters.at(i));
+		rMap[characters.at(i)->getX() / TILE_SIZE + characters.at(i)->getY() / TILE_SIZE * MAP_WIDTH] = characters.at(i);
 		//fprintf(stderr, "%d - i\n", i);
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
@@ -87,8 +87,10 @@ for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 void Core::generateNPCs(int num) {
 	for (int i = 0; i < num; i++) {
 		sf::Texture* _npcTexture = graphics->loadImage("resources/sprites/squid_npc.png");
-		int randX = (rand() % WINDOW_WIDTH) / TILE_SIZE * TILE_SIZE;
-		int randY = (rand() % WINDOW_HEIGHT) / TILE_SIZE * TILE_SIZE;
+		int randX = (rand() % MAP_WIDTH) / TILE_SIZE * TILE_SIZE;
+		int randY = (rand() % MAP_HEIGHT) / TILE_SIZE * TILE_SIZE;
+		//randX = 0;
+		//randY = 0;
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);
 
 		_npc->setFov(cFovRings);
@@ -105,7 +107,7 @@ void Core::load() {
 	//calculate fov
 	calculateCFov();
 
-	rMap = (Playable**)malloc(sizeof(Playable*) * MAP_HEIGHT * MAP_WIDTH);
+	rMap = new Playable*[MAP_WIDTH*MAP_HEIGHT];
 
 
 
@@ -125,15 +127,17 @@ void Core::load() {
 		}
 	}
 
-	fprintf(stderr, "loading pathfinder\n");
+	/*fprintf(stderr, "loading pathfinder\n");
 	Graph* g = new Graph(&rMap, MAP_WIDTH, MAP_HEIGHT);
 	PathFinder* pf = new PathFinder(g);
 	fprintf(stderr, "checking U\n");
-	std::deque<move_t>* path = pf->findPath(intpair(0, 0), intpair(63, 1));
-	fprintf(stderr, "generated path is: \n");
+	int wayX = (rand() % WINDOW_WIDTH) / TILE_SIZE;
+	int wayY = (rand() % WINDOW_HEIGHT) / TILE_SIZE;
+	std::deque<move_t>* path = pf->findPath(intpair(0, 0), intpair(wayX, wayY));
+	fprintf(stderr, "generated path from (0,0) to (%d,%d) is: \n", wayX, wayY);
 	for (int i = 0; i < path->size(); i++){
 		fprintf(stderr, "%d\n", path->at(i));
-	}
+	}*/
 	
 	//load player sprite
 	sf::Texture* _playerTexture = graphics->loadImage("resources/sprites/squid_player.png");
