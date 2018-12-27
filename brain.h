@@ -3,6 +3,7 @@
 #include "playable.h"
 #include "globals.h"
 #include "dstarlite.h"
+#include "anytimedstar.h"
 #include <random>
 #include <deque>
 
