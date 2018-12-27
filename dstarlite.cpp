@@ -25,12 +25,62 @@ void PathFinder::reset() {
 	km = 0;
 	bigU.clear();
 }
+
+intpair PathFinder::getNearestFree(intpair tile, intpair origin) {
+	if (graph->isFree(tile))
+		return tile;
+	move_t dir;
+	intpair nearest = tile;
+	while (!graph->isFree(tile)) {
+		int normalX = abs(origin.x - tile.x);
+		int normalY = abs(origin.y - tile.y);
+		if (normalX == 0)
+			normalX = 1;
+		if (normalY == 0)
+			normalY = 1;
+		dir = (move_t)((origin.x - tile.x) / normalX * -4 + (origin.y - tile.y) / normalY);
+		
+		switch (dir) {
+		case move_t::N:
+			nearest = intpair(tile.x, tile.y - 1);
+			break;
+		case move_t::E:
+			nearest = intpair(tile.x + 1, tile.y);
+			break;
+		case move_t::W:
+			nearest = intpair(tile.x - 1, tile.y);
+			break;
+		case move_t::S:
+			nearest = intpair(tile.x, tile.y + 1);
+			break;
+		case move_t::NE:
+			nearest = intpair(tile.x + 1, tile.y - 1);
+			break;
+		case move_t::NW:
+			nearest = intpair(tile.x - 1, tile.y - 1);
+			break;
+		case move_t::SE:
+			nearest = intpair(tile.x + 1, tile.y + 1);
+			break;
+		case move_t::SW:
+			nearest = intpair(tile.x - 1, tile.y + 1);
+			break;
+		}
+	}
+	//dir is what direction to face standing from origin looking at tile
+}
+
 std::deque<move_t>* PathFinder::findPath(intpair start, intpair end)
 {
-	fprintf(stderr, "finding path from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
+	
+	
+	end = getNearestFree(end, start);
+	//fprintf(stderr, "finding path from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
 
 	if (start == end)
 		return nullptr;
+	
+
 	//fprintf(stderr, "we make it here\n");
 	reset();
 
@@ -77,7 +127,7 @@ std::deque<move_t>* PathFinder::findPath(intpair start, intpair end)
 	
 	intpair currTile = s_start;
 	//fprintf(stderr, "scanning through graph for shortest path\n");
-	fprintf(stderr, "returning path:\n");
+	//fprintf(stderr, "returning path:\n");
 	while (currTile != s_goal) {
 		
 		float minCost = FLT_MAX;
@@ -102,12 +152,12 @@ std::deque<move_t>* PathFinder::findPath(intpair start, intpair end)
 		//fprintf(stderr, "nextTile is (%d,%d)\n", nextTile.x, nextTile.y);
 		//fprintf(stderr, "minCost is %f\n", minCost);
 		move_t nextMove = (move_t)(-1 * (currTile.x - nextTile.x) * 4 + currTile.y - nextTile.y);
-		fprintf(stderr, "%d ", nextMove);
+		//fprintf(stderr, "%d ", nextMove);
 		path->push_back(nextMove);
 		currTile = nextTile;
 	}
 	
-	fprintf(stderr, "\n");
+	//fprintf(stderr, "\n");
 	return path;
 }
 

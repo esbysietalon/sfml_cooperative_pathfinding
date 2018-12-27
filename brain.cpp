@@ -97,7 +97,7 @@ order_t* Brain::nextMove() {
 }
 */
 move_t Brain::nextStep() {
-	fprintf(stderr, "request next step\n");
+	//fprintf(stderr, "request next step\n");
 	move_t step;
 	if (_currPath != NULL && !_currPath->empty()) {
 		step = _currPath->front();
@@ -268,8 +268,7 @@ void Brain::printLemory() {
 void Brain::think() {
 	//fprintf(stderr, "default-behavior\n");
 	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
-	if(_currPath != NULL)
-		fprintf(stderr, "path size is currently %d\n", _currPath->size());
+	
 	if (_thoughtQueue->size() == 0) {
 		//fprintf(stderr, "default behavior\n");
 		struct order_t* defaultBehaviour = new struct order_t;
@@ -339,7 +338,7 @@ void Brain::think() {
 		//fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		fprintf(stderr, "move\n");
+		//fprintf(stderr, "move\n");
 		/*if (_currPath != NULL) {
 			std::deque<move_t>().swap(*_currPath);
 			//_currPath->clear();
@@ -347,7 +346,7 @@ void Brain::think() {
 			//delete _currPath;
 		}*/
 		if (_currPath == NULL || _currPath->empty()) {
-			fprintf(stderr, "path empty - recalculate\n");
+			//fprintf(stderr, "path empty - recalculate\n");
 			_currPath = pathFind(nextThought->x, nextThought->y);
 		}
 		//fprintf(stderr, "distSq %f\n", distSq);
@@ -356,7 +355,7 @@ void Brain::think() {
 			//printLemory();
 			if(_currPath != NULL)
 				_currPath->clear();
-			fprintf(stderr, "move again\n");
+			//fprintf(stderr, "move again\n");
 			_thoughtQueue->pop_front();
 			struct order_t* newThought = new order_t;
 			newThought->type = order_type_t::MOVE;

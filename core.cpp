@@ -87,8 +87,8 @@ for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 void Core::generateNPCs(int num) {
 	for (int i = 0; i < num; i++) {
 		sf::Texture* _npcTexture = graphics->loadImage("resources/sprites/squid_npc.png");
-		int randX = (rand() % MAP_WIDTH) / TILE_SIZE * TILE_SIZE;
-		int randY = (rand() % MAP_HEIGHT) / TILE_SIZE * TILE_SIZE;
+		int randX = (rand() % WINDOW_WIDTH) / TILE_SIZE * TILE_SIZE;
+		int randY = (rand() % WINDOW_HEIGHT) / TILE_SIZE * TILE_SIZE;
 		//randX = 0;
 		//randY = 0;
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);

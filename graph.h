@@ -14,6 +14,7 @@ public:
 	void pred(intpair node, intpair** arr, int* outlen);
 	void succ(intpair node, intpair** arr, int* outlen);
 	bool isIn(intpair node);
+	bool isFree(intpair node);
 
 	int width();
 	int height();

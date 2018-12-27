@@ -35,7 +35,13 @@ float Graph::costAdj(intpair start, intpair end) {
 	int distY = start.y - end.y;
 	return sqrt(distX * distX + distY * distY);
 }
-
+bool Graph::isFree(intpair node) {
+	if (!isIn(node))
+		return false;
+	if ((*rmap)[node.x + node.y * mapW] != 0 && (*rmap)[node.x + node.y * mapW] != host)
+		return false;
+	return true;
+}
 bool Graph::isIn(intpair node) {
 	if (node.x >= 0 && node.x < mapW && node.y >= 0 && node.y < mapH)
 		return true;

@@ -18,7 +18,10 @@ public:
 
 	std::deque<move_t>* findPath(intpair start, intpair end);
 	void reset();
+	std::deque<move_t>* updatePath(intpair start, intpair end);
 private:
+	intpair getNearestFree(intpair tile, intpair origin);
+
 	void updateVertex(vertEntry u);
 	void updateVertex(intpair s);
 	void computeShortestPath();
