@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "terrain.h"
 #include <stdio.h>
+#include "dstarlite.h"
 
 void Core::update() {
 	for (int j = 0; j < MAP_HEIGHT; j++) {
@@ -30,57 +31,57 @@ void Core::calculateCFov() {
 	std::vector<struct intpair> listed;
 	//FILE* fov_file = fopen("cfov.txt", "w");
 	//fclose(fov_file);
-	//fov_file = fopen("cfov.txt", "a+");
-	for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
-		//fprintf(fov_file, "\nstd::vector<struct intpair>* newRing%d = new std::vector<struct intpair>();\n", rad);
-		int ringLength = 0;
-		int skipDist = (int)((rad / sqrt(2)));
-		//fprintf(stderr, "%d, %d\n", rad, skipDist);
-		std::vector<struct intpair> newRing;
-		int loops = 0;
-		for (int y = -rad; y <= rad; y++) {
-			for (int x = -rad; x <= rad; x++) {
-				loops++;
-				if (rad > skipDist && y >= -skipDist && y <= skipDist) {
-					if (x >= -skipDist && x <= skipDist) {				
-						x = skipDist;
-						continue;
-					}
-				}
-				float dist = sqrt(x * x + y * y);
-				if (floor(dist) > rad) {
-					if (x < 0)
-						continue;
-						//x += floor(sqrt((dist - rad) * (dist - rad) - y * y * (dist - rad) / (float)dist));
-					else
-						x = rad;
+//fov_file = fopen("cfov.txt", "a+");
+for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
+	//fprintf(fov_file, "\nstd::vector<struct intpair>* newRing%d = new std::vector<struct intpair>();\n", rad);
+	int ringLength = 0;
+	int skipDist = (int)((rad / sqrt(2)));
+	//fprintf(stderr, "%d, %d\n", rad, skipDist);
+	std::vector<struct intpair> newRing;
+	int loops = 0;
+	for (int y = -rad; y <= rad; y++) {
+		for (int x = -rad; x <= rad; x++) {
+			loops++;
+			if (rad > skipDist && y >= -skipDist && y <= skipDist) {
+				if (x >= -skipDist && x <= skipDist) {
+					x = skipDist;
 					continue;
 				}
-				//if (floor(dist) <= rad) {
-					struct intpair point(x, y);
-					bool notListed = false;
-					for (int i = 0; i < listed.size(); i++) {
-						if (listed.at(i).x == x && listed.at(i).y == y) {
-							notListed = true;
-							break;
-						}
-					}
-					if (!notListed) {
-						listed.push_back(point);
-						newRing.emplace_back(point);
-						ringLength++;
-						//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
-					}
-				//}
 			}
+			float dist = sqrt(x * x + y * y);
+			if (floor(dist) > rad) {
+				if (x < 0)
+					continue;
+				//x += floor(sqrt((dist - rad) * (dist - rad) - y * y * (dist - rad) / (float)dist));
+				else
+					x = rad;
+				continue;
+			}
+			//if (floor(dist) <= rad) {
+			struct intpair point(x, y);
+			bool notListed = false;
+			for (int i = 0; i < listed.size(); i++) {
+				if (listed.at(i).x == x && listed.at(i).y == y) {
+					notListed = true;
+					break;
+				}
+			}
+			if (!notListed) {
+				listed.push_back(point);
+				newRing.emplace_back(point);
+				ringLength++;
+				//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
+			}
+			//}
 		}
-		//fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
-		cFovRings.emplace_back(newRing);
-		//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
-		//fprintf(stderr, "%d\n", rad);
 	}
-	//fprintf(stderr, "%d", skippedLoops);
-	//fclose(fov_file);
+	//fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
+	cFovRings.emplace_back(newRing);
+	//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
+	//fprintf(stderr, "%d\n", rad);
+}
+//fprintf(stderr, "%d", skippedLoops);
+//fclose(fov_file);
 }
 
 void Core::generateNPCs(int num) {
@@ -89,7 +90,7 @@ void Core::generateNPCs(int num) {
 		int randX = (rand() % WINDOW_WIDTH) / TILE_SIZE * TILE_SIZE;
 		int randY = (rand() % WINDOW_HEIGHT) / TILE_SIZE * TILE_SIZE;
 		Playable* _npc = new Playable(_npcTexture, SPRITE_SIZE, SPRITE_SIZE, randX, randY);
-		
+
 		_npc->setFov(cFovRings);
 		_npc->setRMap(&rMap);
 		_npc->addAnimation(0, 0, 0, { animation_t::IDLE });
@@ -105,10 +106,12 @@ void Core::load() {
 	calculateCFov();
 
 	rMap = (Playable**)malloc(sizeof(Playable*) * MAP_HEIGHT * MAP_WIDTH);
-	
+
+
+
 	//load floor
 	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES; i++) {
-		std::string filePath = "resources/tiles/floor_"+ std::to_string(i+1) +".png";
+		std::string filePath = "resources/tiles/floor_" + std::to_string(i + 1) + ".png";
 		sf::Texture* _tileTexture = graphics->loadImage(filePath);
 		terrain->registerTile((tile_t)i, _tileTexture);
 	}
@@ -118,9 +121,20 @@ void Core::load() {
 			map[i + j * MAP_WIDTH] = new sf::Sprite;
 			map[i + j * MAP_WIDTH]->setTexture(*(terrain->getTileTAt(i, j)));
 			map[i + j * MAP_WIDTH]->setPosition(i * 16, j * 16);
-			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::TERRAIN : rmap::EMPTY);
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
 		}
 	}
+
+	fprintf(stderr, "loading pathfinder\n");
+	Graph* g = new Graph(&rMap, MAP_WIDTH, MAP_HEIGHT);
+	PathFinder* pf = new PathFinder(g);
+	fprintf(stderr, "checking U\n");
+	std::deque<move_t>* path = pf->findPath(intpair(0, 0), intpair(63, 1));
+	fprintf(stderr, "generated path is: \n");
+	for (int i = 0; i < path->size(); i++){
+		fprintf(stderr, "%d\n", path->at(i));
+	}
+	
 	//load player sprite
 	sf::Texture* _playerTexture = graphics->loadImage("resources/sprites/squid_player.png");
 	Playable* _player = new Playable(_playerTexture, SPRITE_SIZE, SPRITE_SIZE, WINDOW_WIDTH / 2 / TILE_SIZE * TILE_SIZE, WINDOW_HEIGHT / 2 / TILE_SIZE * TILE_SIZE);
