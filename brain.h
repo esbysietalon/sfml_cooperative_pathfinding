@@ -10,6 +10,7 @@
 class Playable;
 class Graph;
 class PathFinder;
+class PathFinderPlus;
 
 enum move_t;
 
@@ -57,6 +58,7 @@ private:
 	Playable* _host;
 	
 	std::deque<move_t>* pathFind(int x, int y);
+	std::deque<move_t>* pathLook(int x, int y);
 	std::deque<move_t>* _currPath;
 	int pathIndex;
 	
@@ -69,6 +71,7 @@ private:
 
 	Graph* memGraph;
 	PathFinder* pf;
+	PathFinderPlus* pfp;
 	
 
 };

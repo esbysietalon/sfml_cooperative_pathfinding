@@ -20,6 +20,8 @@ public:
 	int height();
 
 	float costAdj(intpair start, intpair end);
+
+	void getMapCopy(Playable*** map, intpair o);
 private:
 	Playable*** rmap;
 	Playable* host;

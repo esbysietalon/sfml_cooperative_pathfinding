@@ -15,6 +15,19 @@ int Graph::height() {
 	return mapH;
 }
 
+void Graph::getMapCopy(Playable*** map, intpair o) {
+	//fprintf(stderr, "o(%d,%d)\n", o.x, o.y);
+	int size = mapW * mapH;
+	for (int j = o.y - LOOK_AHEAD_DIST; j <= o.y + LOOK_AHEAD_DIST; j++) {
+		for (int i = o.x - LOOK_AHEAD_DIST; i <= o.x + LOOK_AHEAD_DIST; i++) {
+			int index = i + j * mapW;
+			if (index < 0 || index >= size)
+				continue;
+			(*map)[index] = (*rmap)[index];
+		}
+	}
+}
+
 float Graph::costAdj(intpair start, intpair end) {
 	//fprintf(stderr, "checking cost from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
 	//if ((start.x == 0 && start.y == 0) || (end.x == 0 && end.y == 0)) {

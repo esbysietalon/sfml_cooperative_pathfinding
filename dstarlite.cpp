@@ -31,42 +31,43 @@ intpair PathFinder::getNearestFree(intpair tile, intpair origin) {
 		return tile;
 	move_t dir;
 	intpair nearest = tile;
-	while (!graph->isFree(tile)) {
-		int normalX = abs(origin.x - tile.x);
-		int normalY = abs(origin.y - tile.y);
+	while (!graph->isFree(nearest)) {
+		int normalX = abs(origin.x - nearest.x);
+		int normalY = abs(origin.y - nearest.y);
 		if (normalX == 0)
 			normalX = 1;
 		if (normalY == 0)
 			normalY = 1;
-		dir = (move_t)((origin.x - tile.x) / normalX * -4 + (origin.y - tile.y) / normalY);
-		
+		dir = (move_t)((origin.x - nearest.x) / normalX * -4 + (origin.y - nearest.y) / normalY);
+
 		switch (dir) {
 		case move_t::N:
-			nearest = intpair(tile.x, tile.y - 1);
+			nearest = intpair(nearest.x, nearest.y - 1);
 			break;
 		case move_t::E:
-			nearest = intpair(tile.x + 1, tile.y);
+			nearest = intpair(nearest.x + 1, nearest.y);
 			break;
 		case move_t::W:
-			nearest = intpair(tile.x - 1, tile.y);
+			nearest = intpair(nearest.x - 1, nearest.y);
 			break;
 		case move_t::S:
-			nearest = intpair(tile.x, tile.y + 1);
+			nearest = intpair(nearest.x, nearest.y + 1);
 			break;
 		case move_t::NE:
-			nearest = intpair(tile.x + 1, tile.y - 1);
+			nearest = intpair(nearest.x + 1, nearest.y - 1);
 			break;
 		case move_t::NW:
-			nearest = intpair(tile.x - 1, tile.y - 1);
+			nearest = intpair(nearest.x - 1, nearest.y - 1);
 			break;
 		case move_t::SE:
-			nearest = intpair(tile.x + 1, tile.y + 1);
+			nearest = intpair(nearest.x + 1, nearest.y + 1);
 			break;
 		case move_t::SW:
-			nearest = intpair(tile.x - 1, tile.y + 1);
+			nearest = intpair(nearest.x - 1, nearest.y + 1);
 			break;
 		}
 	}
+	return nearest;
 	//dir is what direction to face standing from origin looking at tile
 }
 

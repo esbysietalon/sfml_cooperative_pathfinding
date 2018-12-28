@@ -5,6 +5,7 @@
 #include "terrain.h"
 #include <stdio.h>
 #include "dstarlite.h"
+#include "anytimedstar.h"
 
 void Core::update() {
 	for (int j = 0; j < MAP_HEIGHT; j++) {
@@ -13,7 +14,16 @@ void Core::update() {
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
-		rMap[characters.at(i)->getX() / TILE_SIZE + characters.at(i)->getY() / TILE_SIZE * MAP_WIDTH] = characters.at(i);
+		int x = characters.at(i)->getX() / TILE_SIZE;
+		int y = characters.at(i)->getY() / TILE_SIZE;
+		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
+			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
+				int index = x + ix + (y + iy) * MAP_WIDTH;
+				if(index >= 0 && index < MAP_HEIGHT * MAP_WIDTH)
+					rMap[x + ix + (y + iy) * MAP_WIDTH] = characters.at(i);
+			}
+		}
+		
 		//fprintf(stderr, "%d - i\n", i);
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
@@ -128,13 +138,14 @@ void Core::load() {
 	}
 
 	/*fprintf(stderr, "loading pathfinder\n");
-	Graph* g = new Graph(&rMap, MAP_WIDTH, MAP_HEIGHT);
-	PathFinder* pf = new PathFinder(g);
+	Graph* g = new Graph(&rMap, MAP_WIDTH, MAP_HEIGHT, NULL);
+	PathFinderPlus* pf = new PathFinderPlus(g, 4);
 	fprintf(stderr, "checking U\n");
 	int wayX = (rand() % WINDOW_WIDTH) / TILE_SIZE;
 	int wayY = (rand() % WINDOW_HEIGHT) / TILE_SIZE;
+	pf->replanPath(intpair(0, 0), intpair(wayX, wayY));
 	std::deque<move_t>* path = pf->findPath(intpair(0, 0), intpair(wayX, wayY));
-	fprintf(stderr, "generated path from (0,0) to (%d,%d) is: \n", wayX, wayY);
+	fprintf(stderr, "generated path (of size %d) from (0,0) to (%d,%d) is: \n", path->size(), wayX, wayY);
 	for (int i = 0; i < path->size(); i++){
 		fprintf(stderr, "%d\n", path->at(i));
 	}*/

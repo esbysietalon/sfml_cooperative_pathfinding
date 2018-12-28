@@ -1,23 +1,23 @@
 #include "stdafx.h"
 #include "anytimedstar.h"
 
-void PathFinderPlus::insertQueue(intpair u, key k, std::set<vertEntry> set)
+void PathFinderPlus::insertQueue(intpair u, key k, std::set<vertEntry>* set)
 {
 	vertEntry entry = vertEntry(u, k);
-	set.insert(entry);
+	set->insert(entry);
 }
 
-void PathFinderPlus::removeQueue(intpair u, std::set<vertEntry> set) {
-	for (std::set<vertEntry>::iterator it = set.begin(); it != set.end(); it++) {
+void PathFinderPlus::removeQueue(intpair u, std::set<vertEntry>* set) {
+	for (std::set<vertEntry>::iterator it = set->begin(); it != set->end(); it++) {
 		if ((*it).vertex == u) {
-			set.erase(*it);
+			set->erase(*it);
 			return;
 		}
 	}
 }
 
-bool PathFinderPlus::inQueue(intpair u, std::set<vertEntry> set) {
-	for (std::set<vertEntry>::iterator it = set.begin(); it != set.end(); it++) {
+bool PathFinderPlus::inQueue(intpair u, std::set<vertEntry>* set) {
+	for (std::set<vertEntry>::iterator it = set->begin(); it != set->end(); it++) {
 		if ((*it).vertex == u) {
 			return true;
 		}
@@ -25,22 +25,22 @@ bool PathFinderPlus::inQueue(intpair u, std::set<vertEntry> set) {
 	return false;
 }
 
-void PathFinderPlus::insertQueue(vertEntry u, std::set<vertEntry> set)
+void PathFinderPlus::insertQueue(vertEntry u, std::set<vertEntry>* set)
 {
-	set.insert(u);
+	set->insert(u);
 }
 
-void PathFinderPlus::removeQueue(vertEntry u, std::set<vertEntry> set) {
-	for (std::set<vertEntry>::iterator it = set.begin(); it != set.end(); it++) {
+void PathFinderPlus::removeQueue(vertEntry u, std::set<vertEntry>* set) {
+	for (std::set<vertEntry>::iterator it = set->begin(); it != set->end(); it++) {
 		if ((*it).vertex == u.vertex) {
-			set.erase(*it);
+			set->erase(*it);
 			return;
 		}
 	}
 }
 
-bool PathFinderPlus::inQueue(vertEntry u, std::set<vertEntry> set) {
-	for (std::set<vertEntry>::iterator it = set.begin(); it != set.end(); it++) {
+bool PathFinderPlus::inQueue(vertEntry u, std::set<vertEntry>* set) {
+	for (std::set<vertEntry>::iterator it = set->begin(); it != set->end(); it++) {
 		if ((*it).vertex == u.vertex) {
 			return true;
 		}
@@ -55,19 +55,121 @@ PathFinderPlus::PathFinderPlus(Graph * g, int inflation_factor)
 	int size = graph->width() * graph->height();
 	gScores = new float[size];
 	rhsScores = new float[size];
-	reset();
+	lastMap = new Playable*[size];
 }
 
-std::deque<move_t>* PathFinderPlus::planPath(intpair start, intpair end)
+void PathFinderPlus::replanPath(intpair start, intpair end)
 {
+	//fprintf(stderr, "replanPath call\n");
+	end = getNearestFree(end, start);
+	//fprintf(stderr, "post getnearest call\n");
+	//fprintf(stderr, "made it here\n");
+	reset(start, end);
+	//fprintf(stderr, "also here\n");
+	improvePath();
+	//fprintf(stderr, "replanPath end\n");
+}
+
+intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
+	if (graph->isFree(tile))
+		return tile;
+	move_t dir;
+	intpair nearest = tile;
+	while (!graph->isFree(nearest)) {
+		//fprintf(stderr, "nearest candidate is (%d,%d) [origin is (%d,%d)]\n", nearest.x, nearest.y, origin.x, origin.y);
+		int normalX = abs(origin.x - nearest.x);
+		int normalY = abs(origin.y - nearest.y);
+		if (normalX == 0)
+			normalX = 1;
+		if (normalY == 0)
+			normalY = 1;
+		dir = (move_t)((origin.x - nearest.x) / normalX * 4 - (origin.y - nearest.y) / normalY);
+		
+		switch (dir) {
+		case move_t::NONE:
+			for (int yp = -1; yp <= 1; yp++) {
+				for (int xp = -1; xp <= 1; xp++) {
+					nearest = intpair(nearest.x + xp, nearest.y + yp);
+					if (graph->isFree(nearest)) {
+						return nearest;
+					}
+				}
+			}
+			break;
+		case move_t::N:
+			nearest = intpair(nearest.x, nearest.y - 1);
+			break;
+		case move_t::E:
+			nearest = intpair(nearest.x + 1, nearest.y);
+			break;
+		case move_t::W:
+			nearest = intpair(nearest.x - 1, nearest.y);
+			break;
+		case move_t::S:
+			nearest = intpair(nearest.x, nearest.y + 1);
+			break;
+		case move_t::NE:
+			nearest = intpair(nearest.x + 1, nearest.y - 1);
+			break;
+		case move_t::NW:
+			nearest = intpair(nearest.x - 1, nearest.y - 1);
+			break;
+		case move_t::SE:
+			nearest = intpair(nearest.x + 1, nearest.y + 1);
+			break;
+		case move_t::SW:
+			nearest = intpair(nearest.x - 1, nearest.y + 1);
+			break;
+		}
+	}
+	return nearest;
+	//dir is what direction to face standing from origin looking at tile
+}
+
+std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
+	end = getNearestFree(end, start);
 	s_start = start;
 	s_goal = end;
+	std::deque<move_t>* path = new std::deque<move_t>();
+	intpair currTile = s_start;
+	
+	int stickCounter = 0;
+	while (currTile != s_goal) {
+		if (stickCounter > FUBAR) {
+			fprintf(stderr, "FUBARED in findPath; resetting\n");
+			replanPath(start, end);
+			return findPath(start, end);
+		}
+		stickCounter++;
 
-	return nullptr;
+		float minCost = INFINITY;
+		intpair nextTile = intpair(-1, -1);
+		int len = 0;
+		intpair* succ = new intpair[8];
+		graph->succ(currTile, &succ, &len);
+
+	
+		for (int i = 0; i < len; i++) {
+			float currCost = c(currTile, succ[i]) + g(succ[i]);
+			if (currCost < minCost) {
+				minCost = currCost;
+				nextTile = succ[i];
+			}
+		}
+		move_t nextMove = (move_t)(-1 * (currTile.x - nextTile.x) * 4 + currTile.y - nextTile.y);
+	
+		path->push_back(nextMove);
+		currTile = nextTile;
+	}
+	return path;
 }
 
-key PathFinderPlus::topKey(std::set<vertEntry> set) {
-	return (*set.begin()).key;
+key PathFinderPlus::topKey(std::set<vertEntry>* set) {
+	//fprintf(stderr, "topKey call on a set of size %d\n",set->size());
+	if (set->empty()) {
+		return key(INFINITY, INFINITY);
+	}
+	return (*set->begin()).key;
 }
 
 float PathFinderPlus::c(intpair s, intpair s_) {
@@ -106,10 +208,89 @@ void PathFinderPlus::updateState(intpair s)
 	}
 }
 
+void PathFinderPlus::planMore() {
+	//fprintf(stderr, "planMore call\n");
+	int replan = observeChanges();
+	if (replan > 0) {
+		if(replan == 2){
+			return replanPath(s_start, s_goal);
+		}
+		else {
+			epsilon += EPSILON_STEP + 1;
+		}
+		//fprintf(stderr, "latestChanges are %d\n", latestChanges.size());
+		for (int i = 0; i < latestChanges.size(); i++) {
+			intpair u = latestChanges.at(i);
+			updateState(u);
+		}
+	}
+	while (epsilon > 1) {
+		epsilon--;
+		//fprintf(stderr, "in plan more loop\n");
+		if (open->size() > 0) {
+			for (std::set<vertEntry>::iterator it = open->begin(); it != open->end(); it++) {
+				insertQueue(*it, incons);
+			}
+			open->clear();
+		}
+		if (incons->size() > 0) {
+			for (std::set<vertEntry>::iterator it = incons->begin(); it != incons->end(); it++) {
+				insertQueue((*it).vertex, getKey((*it).vertex), open);
+			}
+			incons->clear();
+		}
+		
+		closed->clear();
+		//fprintf(stderr, "end transfer\n");
+		improvePath();
+		//fprintf(stderr, "end improve path\n");
+	}
+	//fprintf(stderr, "planMore end\n");
+}
+
+bool PathFinderPlus::observeChanges() {
+	latestChanges.clear();
+	int size = graph->height() * graph->width();
+	Playable** currMap = new Playable*[size];
+	graph->getMapCopy(&currMap, s_start);
+	int changes = 0;
+	for (int j = s_start.y - LOOK_AHEAD_DIST; j <= s_start.y + LOOK_AHEAD_DIST; j++) {
+		for (int i = s_start.x - LOOK_AHEAD_DIST; i <= s_start.x + LOOK_AHEAD_DIST; i++) {
+			int currIndex = i + j * graph->width();
+			if (currIndex < 0 || currIndex >= size)
+				continue;
+			if (currMap[currIndex] != lastMap[currIndex]) {
+				latestChanges.push_back(intpair(i, j));
+				changes++;
+			}
+		}
+	}
+	delete[] currMap;
+	graph->getMapCopy(&lastMap, s_start);
+	//fprintf(stderr, "change percent: %f\n", changes / (float)size);
+	if (changes / (float)size > MAP_CHANGE_TOLERANCE_LARGE) {
+		return 2;
+	}
+	if (changes / (float)size > MAP_CHANGE_TOLERANCE_SMALL) {
+		return 1;
+	}
+	return 0;
+}
+
 void PathFinderPlus::improvePath() {
+	//fprintf(stderr, "improvePath call\n");
+	int stickCount = 0;
 	while (topKey(open) < getKey(s_start) || rhs(s_start) != g(s_start)) {
-		vertEntry s = *open.begin();
-		open.erase(s);
+		//fprintf(stderr, "in while loop\n");
+		if (stickCount > FUBAR * 2) {
+			fprintf(stderr, "FUBARED in improvePath; resetting\n");
+			s_start = getNearestFree(s_start, s_start);
+			s_goal = getNearestFree(s_goal, s_goal);
+			return replanPath(s_start, s_goal);
+		}
+		stickCount++;
+		vertEntry s = *open->begin();
+		open->erase(s);
 		
 		if (g(s) > rhs(s)) {
 			setG(s, rhs(s));
@@ -137,18 +318,22 @@ void PathFinderPlus::improvePath() {
 	}
 }
 
-void PathFinderPlus::reset()
+void PathFinderPlus::reset(intpair start, intpair end)
 {
+	s_start = start;
+	s_goal = end;
 	epsilon = epsilon_i;
 	int size = graph->width() * graph->height();
 	for (int i = 0; i < size; i++) {
 		gScores[i] = INFINITY;
 		rhsScores[i] = INFINITY;
+		lastMap[i] = 0;
 	}
+	
+	open = new std::set<vertEntry>();
+	closed = new std::set<vertEntry>();
+	incons = new std::set<vertEntry>();
 	setRHS(s_goal, 0);
-	open.clear();
-	closed.clear();
-	incons.clear();
 	insertQueue(s_goal, getKey(s_goal), open);
 }
 

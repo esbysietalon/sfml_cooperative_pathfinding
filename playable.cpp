@@ -208,7 +208,7 @@ void Playable::update() {
 	}
 	removeFlags({ animation_t::MOVE_LEFT, animation_t::MOVE_RIGHT });
 	if (currStep == move_t::N) {
-		_y-=SPEED;
+		_y-=SPEED * 2;
 		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
 			addFlags({ animation_t::MOVE_RIGHT });
 			removeFlags({ animation_t::MOVE_LEFT });
@@ -224,24 +224,24 @@ void Playable::update() {
 
 	}
 	if (currStep == move_t::W) {
-		_x-= SPEED;
+		_x-= SPEED * 2;
 		addFlags({ animation_t::MOVE_LEFT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::NW) {
-		_y-= 0.707106781 * SPEED;
-		_x-= 0.707106781 * SPEED;
+		_y-= 0.707106781 * SPEED * 2;
+		_x-= 0.707106781 * SPEED * 2;
 		addFlags({ animation_t::MOVE_LEFT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::SW) {
-		_y+= 0.707106781 * SPEED;
-		_x-= 0.707106781 * SPEED;
+		_y+= 0.707106781 * SPEED * 2;
+		_x-= 0.707106781 * SPEED * 2;
 		addFlags({ animation_t::MOVE_LEFT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_RIGHT, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::S) {
-		_y+= SPEED;
+		_y+= SPEED * 2;
 		if (areFlagsSet({ animation_t::MOVE_RIGHT })) {
 			addFlags({ animation_t::MOVE_RIGHT });
 			removeFlags({ animation_t::MOVE_LEFT });
@@ -256,19 +256,19 @@ void Playable::update() {
 		removeFlags({ animation_t::IDLE, animation_t::FACE_RIGHT, animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::E) {
-		_x+= SPEED;
+		_x+= SPEED * 2;
 		addFlags({ animation_t::MOVE_RIGHT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::NE) {
-		_y-= 0.707106781 * SPEED;
-		_x+= 0.707106781 * SPEED;
+		_y-= 0.707106781 * SPEED * 2;
+		_x+= 0.707106781 * SPEED * 2;
 		addFlags({ animation_t::MOVE_RIGHT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
 	}
 	if (currStep == move_t::SE) {
-		_y+= 0.707106781 * SPEED;
-		_x+= 0.707106781 * SPEED;
+		_y+= 0.707106781 * SPEED * 2;
+		_x+= 0.707106781 * SPEED * 2;
 		addFlags({ animation_t::MOVE_RIGHT });
 		removeFlags({ animation_t::IDLE, animation_t::MOVE_LEFT, animation_t::FACE_RIGHT,animation_t::FACE_LEFT });
 	}
