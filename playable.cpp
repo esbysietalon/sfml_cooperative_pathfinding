@@ -336,11 +336,16 @@ void Playable::update_AI()
 			int vert = currStep - hori * 4;
 			moveGoalX = getX() + hori * TILE_SIZE;
 			moveGoalY = getY() - vert * TILE_SIZE;
+			if (moveGoalX >= MAP_WIDTH * TILE_SIZE || moveGoalX < 0 || moveGoalY >= MAP_HEIGHT * TILE_SIZE || moveGoalY < 0) {
+				fprintf(stderr, "illegal move\n", currStep);
+				currStep = move_t::NONE;
+			}
 		}
 		else {
 			moveGoalX = getX();
 			moveGoalY = getY();
 		}
+		
 		//fprintf(stderr, "end move\n");
 		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
 	}

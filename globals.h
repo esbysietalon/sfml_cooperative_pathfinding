@@ -15,7 +15,7 @@
 #define TILE_SIZE 16
 #define SPRITE_SIZE 16
 #define SPEED 1
-#define NPC_NUM 5
+#define NPC_NUM 15
 #define MAX_ANIMS 64 // 2 ^ NUM_FLAGS
 #define MAP_CHANGE_TOLERANCE_LARGE 0.33
 #define MAP_CHANGE_TOLERANCE_SMALL 0

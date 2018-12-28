@@ -39,6 +39,9 @@ float Graph::costAdj(intpair start, intpair end) {
 		//fprintf(stderr, "am i in here?\n");
 		return INFINITY;
 	}
+	if (end.x < 0 || end.x >= MAP_WIDTH || end.y < 0 || end.y >= MAP_HEIGHT){
+		return INFINITY;
+	}
 	//fprintf(stderr, "accessing rmap at %d\n", end.x + end.y * mapW);
 	if ((*rmap)[end.x + end.y * mapW] != 0 && (*rmap)[end.x + end.y * mapW] != host) {
 		//fprintf(stderr, "or am i in here?\n");
