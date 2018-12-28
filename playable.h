@@ -53,6 +53,8 @@ public:
 
 	void setRMap(Playable***);
 
+	void setSocial(int social);
+
 	void setFov(std::vector<std::vector<struct intpair>> fov);
 	std::vector<std::vector<struct intpair>> fovRings;
 private:

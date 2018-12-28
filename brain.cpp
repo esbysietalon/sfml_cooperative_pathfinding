@@ -84,6 +84,11 @@ Brain::Brain(Playable* target) {
 	//printLemory();
 	
 }
+
+void Brain::setSocial(int soc) {
+	social = soc;
+}
+
 void Brain::registerEntity(Playable* entity) {
 	_sensedEntities.emplace(_sensedEntities.end(), entity);
 }

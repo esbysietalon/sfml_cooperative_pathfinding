@@ -46,6 +46,11 @@ void Playable::setRMap(Playable*** rMap) {
 	brain->setRMap(rMap);
 }
 
+void Playable::setSocial(int social)
+{
+	brain->setSocial(social);
+}
+
 int intpow(int base, int exponent) {
 	int out = 1;
 	while (exponent > 0) {
@@ -326,10 +331,16 @@ void Playable::update_AI()
 	//fprintf(stderr, "post-think\n");
 	if (currStep == move_t::NONE) {
 		currStep = brain->nextStep();
-		int hori = round((float)currStep / 4);
-		int vert = currStep - hori * 4;
-		moveGoalX = getX() + hori * TILE_SIZE;
-		moveGoalY = getY() - vert * TILE_SIZE;
+		if (currStep != move_t::NONE) {
+			int hori = round((float)currStep / 4);
+			int vert = currStep - hori * 4;
+			moveGoalX = getX() + hori * TILE_SIZE;
+			moveGoalY = getY() - vert * TILE_SIZE;
+		}
+		else {
+			moveGoalX = getX();
+			moveGoalY = getY();
+		}
 		//fprintf(stderr, "end move\n");
 		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
 	}

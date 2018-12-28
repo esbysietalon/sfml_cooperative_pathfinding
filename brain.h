@@ -40,6 +40,7 @@ public:
 	void meander(int* x, int* y);
 
 	int getSocial();
+	void setSocial(int social);
 	
 	void see();
 	void setRMap(Playable*** rMap);

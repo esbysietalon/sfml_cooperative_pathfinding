@@ -165,6 +165,7 @@ void Core::load() {
 	//place player into update cycle
 	_player->setRMap(&rMap);
 	_player->setControl(true);
+	_player->setSocial(101);
 	characters.emplace(characters.end(), _player);
 	
 	

@@ -70,4 +70,7 @@ private:
 
 	std::deque<intpair> latestChanges;
 	intpair s_start, s_goal;
+
+
+	int resetCount = 0;
 };
