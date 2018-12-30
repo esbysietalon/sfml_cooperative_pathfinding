@@ -29,7 +29,7 @@ void Brain::see() {
 	//implement cfov
 	//reset sightmaps
 	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
-	//fprintf(stderr, "i can see\n");
+	//fprintf(stderr, "%d can see\n", social);
 	for (int i = 0; i < 4 * (BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1); i++) {
 		sightMap[i] = 0;
 	}
@@ -45,11 +45,16 @@ void Brain::see() {
 			int cy = y + _host->getY() / TILE_SIZE;
 			int smx = (x + BASE_SIGHT_RANGE);
 			int smy = (y + BASE_SIGHT_RANGE);
+			
 			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
+				//if((*rmap)[cx + cy * MAP_WIDTH] != 0 && (*rmap)[cx + cy * MAP_WIDTH] != _host)
+					
 				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
 				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS && sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] != _host) {
-					if(uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]))
+					if (uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)])) {
+						//fprintf(stderr, "and i see %d\n", (*rmap)[cx + cy * MAP_WIDTH]->getSocial());
 						_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
+					}
 				}
 				//fprintf(stderr, "x: %d y: %d xlim: %d ylim: %d\n", (x + BASE_SIGHT_RANGE), (y + BASE_SIGHT_RANGE), 2 * (BASE_SIGHT_RANGE + 1), 2 * (BASE_SIGHT_RANGE + 1));
 			}
@@ -67,6 +72,7 @@ void Brain::see() {
 			}
 		}
 	}
+	//fprintf(stderr, "i saw %d things\n", _sensedEntities.size());
 	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
 }
 Brain::Brain(Playable* target) {
@@ -96,7 +102,7 @@ Brain::Brain(Playable* target) {
 }
 
 void Brain::setSocial(int soc) {
-	fprintf(stderr, "\n%d-%d\n", social, soc);
+	//fprintf(stderr, "\n%d-%d\n", social, soc);
 	social = soc;
 }
 
@@ -164,7 +170,7 @@ int Brain::getSocial() {
 	return social;
 }
 void Brain::say(Playable* target) {
-	fprintf(stderr, "\nsay call\n");
+	//fprintf(stderr, "\nsay call\n");
 	float distSq = (_host->getSprite()->getPosition().x - target->getSprite()->getPosition().x) * (_host->getSprite()->getPosition().x - target->getSprite()->getPosition().x) + (_host->getSprite()->getPosition().y - target->getSprite()->getPosition().y) * (_host->getSprite()->getPosition().y - target->getSprite()->getPosition().y);
 	//if (distSq <= BASE_HEAR_DIST) {
 		if (target->getSocial() < social && target->getSocial() != 0) {
@@ -268,11 +274,11 @@ void Brain::think() {
 	case order_type_t::FOLLOW:
 		//fprintf(stderr, "follow by %d\n", _host);
 		social = 0;
-		if (nextThought->target->getSocial() == 0) {
-			social = originalSoc;
-			_thoughtQueue->clear();
-			break;
-		}
+		//if (nextThought->target->getSocial() == 0) {
+			//social = originalSoc;
+			//_thoughtQueue->clear();
+			//break;
+		//}
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			/*if (_currPath != NULL) {
 				std::deque<move_t>().swap(*_currPath);
@@ -323,20 +329,21 @@ void Brain::think() {
 
 			for (int i = 0; i < _sensedEntities.size(); i++) {
 				if (_sensedEntities.at(i)->getSocial() < social && _sensedEntities.at(i)->getSocial() != 0) {
+					//fprintf(stderr, "%d: new say candidate\n", _sensedEntities.at(i)->getSocial());
 					newSayTarget = _sensedEntities.at(i);
 					break;
 				}
 			}
 			newSayThought->target = newSayTarget;
 			if (newSayTarget != NULL) {
-				fprintf(stderr, "\nfound new say target: %d\n", newSayThought->target);
+				//fprintf(stderr, "\n%d found new say target: %d\n", social, newSayThought->target->getSocial());
 				newSayThought->type = order_type_t::SAY;
 				_thoughtQueue->pop_front();
 				interruptThought(newSayThought);
 				break;
 			}
 		}
-		if (distSq <= BASE_NE_DIST) {
+		if (distSq <= BASE_NE_DIST || _currPath == NULL || _currPath->empty()) {
 			
 			//printLemory();
 			if(_currPath != NULL)

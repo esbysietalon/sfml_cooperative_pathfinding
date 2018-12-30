@@ -31,22 +31,25 @@ void Core::update() {
 		}
 
 		//fprintf(stderr, "%d - i\n", i);
-		characters.at(i)->emptyRegistry();
-		characters.at(i)->see();
-
-		if (characters.at(i)->isControlled()){
-			//fprintf(stderr, "-pl");
-			characters.at(i)->update();
-		}
-		else {	
-			//fprintf(stderr, "-ai");
-			characters.at(i)->update_AI();
-		}
+		
 		//fprintf(stderr, "||%d", i);
 		//fprintf(stderr, "%d - i\n", i);
 	}
+	for (int i = 0; i < characters.size(); i++) {
+		characters.at(i)->emptyRegistry();
+		characters.at(i)->see();
+
+		if (characters.at(i)->isControlled()) {
+			//fprintf(stderr, "-pl");
+			characters.at(i)->update();
+		}
+		else {
+			//fprintf(stderr, "-ai");
+			characters.at(i)->update_AI();
+		}
+	}
 	//fprintf(stderr, "\nfollowers:%d\n", followers);
-	if (followers == NPC_NUM - 1) {
+	if (followers == NPC_NUM) {
 		fprintf(stderr, "WE DID IT\n");
 
 	}
@@ -180,7 +183,7 @@ void Core::load() {
 	//place player into update cycle
 	_player->setRMap(&rMap);
 	//_player->setControl(true);
-	_player->setSocial(999);
+	//_player->setSocial(999);
 	characters.emplace(characters.end(), _player);
 	
 	
