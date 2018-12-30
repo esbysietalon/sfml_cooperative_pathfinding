@@ -23,6 +23,8 @@
 #define SPEED 1
 //how many npcs are generated
 #define NPC_NUM 15
+//rmap legend (any numbers < RESERVED_RMAP_NUMBERS are not dereferenced)
+#define RESERVED_RMAP_NUMBERS 100
 
 #define MAX_ANIMS 64 // 2 ^ NUM_FLAGS
 //how large the updates made in the memory map
@@ -38,6 +40,6 @@
 #define EPSILON_STEP 1
 //
 //the additional tiles around actual position considered taken up by sprites
-#define PERSONAL_SPACE 0
+#define PERSONAL_SPACE 1
 
 

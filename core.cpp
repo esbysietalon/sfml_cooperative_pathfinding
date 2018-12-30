@@ -14,13 +14,13 @@ void Core::update() {
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
-		int x = characters.at(i)->getX() / TILE_SIZE;
-		int y = characters.at(i)->getY() / TILE_SIZE;
+		int x = characters.at(i)->moveGoals().x / TILE_SIZE;
+		int y = characters.at(i)->moveGoals().y / TILE_SIZE;
 		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
 			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
 				int index = x + ix + (y + iy) * MAP_WIDTH;
-				if(index >= 0 && index < MAP_HEIGHT * MAP_WIDTH)
-					rMap[x + ix + (y + iy) * MAP_WIDTH] = characters.at(i);
+				if(index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
+					rMap[index] = characters.at(i);
 			}
 		}
 		
@@ -164,7 +164,7 @@ void Core::load() {
 	
 	//place player into update cycle
 	_player->setRMap(&rMap);
-	_player->setControl(true);
+	//_player->setControl(true);
 	_player->setSocial(101);
 	characters.emplace(characters.end(), _player);
 	
