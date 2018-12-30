@@ -303,15 +303,28 @@ void Brain::think() {
 				_currPath->clear();
 			//fprintf(stderr, "move again\n");
 			_thoughtQueue->pop_front();
-			struct order_t* newThought = new order_t;
-			newThought->type = order_type_t::MOVE;
-			//_host->clipToGrid();
-			int goalX = 0;
-			int goalY = 0;
-			meander(&goalX, &goalY);
-			newThought->target = NULL;
-			newThought->x = goalX;
-			newThought->y = goalY;
+			struct order_t* newThought = new struct order_t;
+
+			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
+			Playable* target = NULL;
+			for (int i = 0; i < _sensedEntities.size(); i++) {
+				if (_sensedEntities.at(i)->getSocial() < social) {
+					target = _sensedEntities.at(i);
+					break;
+				}
+			}
+			newThought->target = target;
+			if (target != NULL) {
+				newThought->type = order_type_t::SAY;
+			}
+			else {
+				newThought->type = order_type_t::MOVE;
+				int goalX = 0;
+				int goalY = 0;
+				meander(&goalX, &goalY);
+				newThought->x = goalX;
+				newThought->y = goalY;
+			}
 			queueThought(newThought);
 			//fprintf(stderr, "end move\n");
 		}
