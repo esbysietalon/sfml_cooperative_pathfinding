@@ -13,27 +13,42 @@ void Core::update() {
 			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
 		}
 	}
+	int followers = 0;
 	for (size_t i = 0; i < characters.size(); i++) {
+		//fprintf(stderr, "%d:", characters.at(i)->getSocial());
+		if (characters.at(i)->getSocial() == 0) {
+			followers++;
+		}
 		int x = characters.at(i)->moveGoals().x / TILE_SIZE;
 		int y = characters.at(i)->moveGoals().y / TILE_SIZE;
+		//fprintf(stderr, "(%d,%d)", x, y);
 		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
 			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
 				int index = x + ix + (y + iy) * MAP_WIDTH;
-				if(index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
+				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
 					rMap[index] = characters.at(i);
 			}
 		}
-		
+
 		//fprintf(stderr, "%d - i\n", i);
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
-		
-		if (characters.at(i)->isControlled())
+
+		if (characters.at(i)->isControlled()){
+			//fprintf(stderr, "-pl");
 			characters.at(i)->update();
-		else
+		}
+		else {	
+			//fprintf(stderr, "-ai");
 			characters.at(i)->update_AI();
-		
+		}
+		//fprintf(stderr, "||%d", i);
 		//fprintf(stderr, "%d - i\n", i);
+	}
+	//fprintf(stderr, "\nfollowers:%d\n", followers);
+	if (followers == NPC_NUM - 1) {
+		fprintf(stderr, "WE DID IT\n");
+
 	}
 }
 
@@ -165,7 +180,7 @@ void Core::load() {
 	//place player into update cycle
 	_player->setRMap(&rMap);
 	//_player->setControl(true);
-	_player->setSocial(101);
+	_player->setSocial(999);
 	characters.emplace(characters.end(), _player);
 	
 	

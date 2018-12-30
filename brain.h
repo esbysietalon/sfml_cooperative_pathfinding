@@ -45,6 +45,7 @@ public:
 	void see();
 	void setRMap(Playable*** rMap);
 	
+	bool uniqueSight(Playable* sight);
 private:
 	int memoryMap[LMAP_W * LMAP_H];
 	Playable** sightMap;
@@ -66,6 +67,7 @@ private:
 	std::deque<order_t*>* _thoughtQueue;
 	
 	int social;
+	int originalSoc;
 	double randCoeff;
 
 	std::vector<Playable*> _sensedEntities;

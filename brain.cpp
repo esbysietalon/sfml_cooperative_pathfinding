@@ -16,6 +16,14 @@ void Brain::setRMap(Playable*** rMap) {
 	rmap = rMap;
 }
 
+bool Brain::uniqueSight(Playable* sight) {
+	for (int i = 0; i < _sensedEntities.size(); i++) {
+		if (_sensedEntities.at(i) == sight)
+			return false;
+	}
+	return true;
+}
+
 void Brain::see() {
 	
 	//implement cfov
@@ -39,8 +47,9 @@ void Brain::see() {
 			int smy = (y + BASE_SIGHT_RANGE);
 			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
 				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
-				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS) {
-					_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
+				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS && sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] != _host) {
+					if(uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]))
+						_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
 				}
 				//fprintf(stderr, "x: %d y: %d xlim: %d ylim: %d\n", (x + BASE_SIGHT_RANGE), (y + BASE_SIGHT_RANGE), 2 * (BASE_SIGHT_RANGE + 1), 2 * (BASE_SIGHT_RANGE + 1));
 			}
@@ -73,7 +82,8 @@ Brain::Brain(Playable* target) {
 		lemoryMap[i] = 0;
 		memoryMap[i] = 0;
 	}
-	social = distr(generator) % 100;
+	social = distr(generator) % 100 + 1;
+	originalSoc = social;
 	randCoeff = distr(generator) / 1000000.0;
 	_currPath = NULL;
 	_thoughtQueue = new std::deque<order_t*>();
@@ -86,6 +96,7 @@ Brain::Brain(Playable* target) {
 }
 
 void Brain::setSocial(int soc) {
+	fprintf(stderr, "\n%d-%d\n", social, soc);
 	social = soc;
 }
 
@@ -120,7 +131,7 @@ std::deque<move_t>* Brain::pathLook(int x, int y) {
 	x = (int)round((float)x / TILE_SIZE);
 	y = (int)round((float)y / TILE_SIZE);
 	intpair s = _host->moveGoals();
-	fprintf(stderr, "path look is from (%d,%d) to (%d,%d); request from %d to %d\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y, this, pf);
+	//fprintf(stderr, "path look is from (%d,%d) to (%d,%d); request from %d to %d\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y, this, pf);
 	pfp->planMore();
 	//fprintf(stderr, "planned more; now looking\n");
 	return pfp->findPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
@@ -129,7 +140,7 @@ std::deque<move_t>* Brain::pathFind(int x, int y) {
 	x = (int)round((float)x / TILE_SIZE);
 	y = (int)round((float)y / TILE_SIZE);
 	intpair s = _host->moveGoals();
-	fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y);
+	//fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y);
 	pfp->replanPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
 	return pfp->findPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
 	//return pf->findPath(intpair(sx, sy), intpair(x, y));
@@ -153,16 +164,18 @@ int Brain::getSocial() {
 	return social;
 }
 void Brain::say(Playable* target) {
+	fprintf(stderr, "\nsay call\n");
 	float distSq = (_host->getSprite()->getPosition().x - target->getSprite()->getPosition().x) * (_host->getSprite()->getPosition().x - target->getSprite()->getPosition().x) + (_host->getSprite()->getPosition().y - target->getSprite()->getPosition().y) * (_host->getSprite()->getPosition().y - target->getSprite()->getPosition().y);
-	if (distSq <= BASE_HEAR_DIST) {
-		if (target->getSocial() < social) {
+	//if (distSq <= BASE_HEAR_DIST) {
+		if (target->getSocial() < social && target->getSocial() != 0) {
+			target->setSocial(0);
 			struct order_t* thought = new struct order_t;
 			thought->type = order_type_t::FOLLOW;
 			thought->target = _host;
 			//fprintf(stderr, "i am %d\n", _host);
 			target->interruptThought(thought);
 		}
-	}
+	//}
 }
 
 void Brain::meander(int* goalX, int* goalY) {
@@ -201,7 +214,7 @@ void Brain::printLemory() {
 }
 void Brain::think() {
 	//fprintf(stderr, "default-behavior\n");
-	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
+	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue->size());
 	
 	if (_thoughtQueue->size() == 0) {
 		//fprintf(stderr, "default behavior\n");
@@ -240,7 +253,7 @@ void Brain::think() {
 	//fprintf(stderr, "thought queue size is %d\n", _thoughtQueue.size());
 	float distSq = 0;
 	if (nextThought->target != NULL) {
-		//fprintf(stderr, "non-NULL target\n");
+		//fprintf(stderr, "non-NULL target; target is %d\n", nextThought->target);
 		distSq = (nextThought->target->getX() - _host->getX()) * (nextThought->target->getX() - _host->getX()) + (nextThought->target->getY() - _host->getY()) * (nextThought->target->getY() - _host->getY());
 	}
 	else {
@@ -249,10 +262,17 @@ void Brain::think() {
 		distSq = (nextThought->x - _host->getX()) * (nextThought->x - _host->getX()) + (nextThought->y - _host->getY()) * (nextThought->y - _host->getY());
 	}
 	//fprintf(stderr, "retrieved next thought\n");
+	struct order_t* newSayThought = new struct order_t;
+	Playable* newSayTarget = NULL;
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
-		fprintf(stderr, "follow by %d\n", _host);
-		social = nextThought->target->getSocial();
+		//fprintf(stderr, "follow by %d\n", _host);
+		social = 0;
+		if (nextThought->target->getSocial() == 0) {
+			social = originalSoc;
+			_thoughtQueue->clear();
+			break;
+		}
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			/*if (_currPath != NULL) {
 				std::deque<move_t>().swap(*_currPath);
@@ -264,11 +284,11 @@ void Brain::think() {
 			//fprintf(stderr, "%d is target, i am %d\n", nextThought->target, _host);
 			//fprintf(stderr, "%d\n", nextThought->target->getSprite());
 			if (_currPath == NULL || _currPath->empty()) {
-				fprintf(stderr, "find call\n");
+				//fprintf(stderr, "find call\n");
 				_currPath = pathFind(nextThought->target->getX(), nextThought->target->getY());
 			}
 			else {
-				fprintf(stderr, "look call\n");
+				//fprintf(stderr, "look call\n");
 				std::deque<move_t>().swap(*_currPath);
 				_currPath = pathLook(nextThought->target->getX(), nextThought->target->getY());
 			}
@@ -276,10 +296,10 @@ void Brain::think() {
 			//pathIndex = 0;
 		}
 		
-		fprintf(stderr, "end follow\n");
+		//fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		fprintf(stderr, "move\n");
+		//fprintf(stderr, "move\n");
 		/*if (_currPath != NULL) {
 			std::deque<move_t>().swap(*_currPath);
 			//_currPath->clear();
@@ -296,6 +316,26 @@ void Brain::think() {
 			_currPath = pathLook(nextThought->x, nextThought->y);
 		}
 		//fprintf(stderr, "distSq %f\n", distSq);
+		//fprintf(stderr, "_sensedEntities(%d)", _sensedEntities.size());
+		if (_sensedEntities.size() > 0) {
+			
+			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
+
+			for (int i = 0; i < _sensedEntities.size(); i++) {
+				if (_sensedEntities.at(i)->getSocial() < social && _sensedEntities.at(i)->getSocial() != 0) {
+					newSayTarget = _sensedEntities.at(i);
+					break;
+				}
+			}
+			newSayThought->target = newSayTarget;
+			if (newSayTarget != NULL) {
+				fprintf(stderr, "\nfound new say target: %d\n", newSayThought->target);
+				newSayThought->type = order_type_t::SAY;
+				_thoughtQueue->pop_front();
+				interruptThought(newSayThought);
+				break;
+			}
+		}
 		if (distSq <= BASE_NE_DIST) {
 			
 			//printLemory();
@@ -305,33 +345,24 @@ void Brain::think() {
 			_thoughtQueue->pop_front();
 			struct order_t* newThought = new struct order_t;
 
-			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
-			Playable* target = NULL;
-			for (int i = 0; i < _sensedEntities.size(); i++) {
-				if (_sensedEntities.at(i)->getSocial() < social) {
-					target = _sensedEntities.at(i);
-					break;
-				}
-			}
-			newThought->target = target;
-			if (target != NULL) {
-				newThought->type = order_type_t::SAY;
-			}
-			else {
-				newThought->type = order_type_t::MOVE;
-				int goalX = 0;
-				int goalY = 0;
-				meander(&goalX, &goalY);
-				newThought->x = goalX;
-				newThought->y = goalY;
-			}
+			
+			newThought->target = NULL;
+			newThought->type = order_type_t::MOVE;
+			int goalX = 0;
+			int goalY = 0;
+			meander(&goalX, &goalY);
+			newThought->x = goalX;
+			newThought->y = goalY;
+			
 			queueThought(newThought);
+			
+			
 			//fprintf(stderr, "end move\n");
 		}
-		fprintf(stderr, "end move\n");
+		//fprintf(stderr, "end move\n");
 		break;
 	case order_type_t::SAY:
-		fprintf(stderr, "say\n");
+		//fprintf(stderr, "say\n");
 		
 		//fprintf(stderr, "path find\n");
 		if (_currPath == NULL || _currPath->empty()) {
@@ -341,7 +372,7 @@ void Brain::think() {
 			std::deque<move_t>().swap(*_currPath);
 			_currPath = pathLook(nextThought->target->getX(), nextThought->target->getY());
 		}
-		if (distSq < BASE_HEAR_DIST) {
+		if (distSq <= BASE_HEAR_DIST) {
 			//fprintf(stderr, "do say\n");
 			say(nextThought->target);
 			//fprintf(stderr, "did say\n");
@@ -352,7 +383,7 @@ void Brain::think() {
 			std::shuffle(_sensedEntities.begin(), _sensedEntities.end(), generator);
 			Playable* target = NULL;
 			for (int i = 0; i < _sensedEntities.size(); i++) {
-				if (_sensedEntities.at(i)->getSocial() < social) {
+				if (_sensedEntities.at(i)->getSocial() < social && _sensedEntities.at(i)->getSocial() != 0) {
 					target = _sensedEntities.at(i);
 					break;
 				}
@@ -371,7 +402,7 @@ void Brain::think() {
 			}
 			queueThought(newThought);
 		}
-		fprintf(stderr, "end say\n");
+		//fprintf(stderr, "end say\n");
 		break;
 	}
 	/*float goalAngle = (float)(distr(generator)) / 1000000.0 * 2 * 3.14159;

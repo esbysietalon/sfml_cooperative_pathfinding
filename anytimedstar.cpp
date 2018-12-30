@@ -136,7 +136,7 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 	end = getNearestFree(end, start);
 	//start = getNearestFree(start, start);
-	fprintf(stderr, "finding path from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
+	//fprintf(stderr, "finding path from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
 	s_start = start;
 	s_goal = end;
 	std::deque<move_t>* path = new std::deque<move_t>();
@@ -173,11 +173,11 @@ std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 			}
 		}
 		if (nextTile == intpair(-1, -1) && resetCount > HARD_FUBAR) {
-			fprintf(stderr, "path is hard fubar; ignoring instruction\n", this);
+			//fprintf(stderr, "path is hard fubar; ignoring instruction\n", this);
 			resetCount = 0;
 			return nullptr;
 		}
-		fprintf(stderr, "nextTile is (%d,%d) by %d\n", nextTile.x, nextTile.y, this);
+		//fprintf(stderr, "nextTile is (%d,%d) by %d\n", nextTile.x, nextTile.y, this);
 		move_t nextMove = (move_t)(-1 * (currTile.x - nextTile.x) * 4 + currTile.y - nextTile.y);
 
 		path->push_back(nextMove);
@@ -307,13 +307,13 @@ void PathFinderPlus::improvePath() {
 	while (topKey(open) < getKey(s_start) || rhs(s_start) != g(s_start)) {
 		//fprintf(stderr, "in while loop\n");
 		if (stickCount > FUBAR) {
-			fprintf(stderr, "FUBARED in improvePath; checking if possible\n");
+			//fprintf(stderr, "FUBARED in improvePath; checking if possible\n");
 			if (g(s_start) == INFINITY) {
-				fprintf(stderr, "impossible path from (%d,%d) to (%d,%d); aborting\n", s_start.x, s_start.y, s_goal.x, s_goal.y);
+				//fprintf(stderr, "impossible path from (%d,%d) to (%d,%d); aborting\n", s_start.x, s_start.y, s_goal.x, s_goal.y);
 				resetCount = HARD_FUBAR + 1;
 				return;
 			}
-			fprintf(stderr, "possible path claimed; resetting\n");
+			//fprintf(stderr, "possible path claimed; resetting\n");
 			//s_start = getNearestFree(s_start, s_start);
 			//s_goal = getNearestFree(s_goal, s_goal);
 			return replanPath(s_start, s_goal);

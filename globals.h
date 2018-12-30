@@ -10,7 +10,7 @@
 #define LMAP_H 36
 #define FRAMERATE 60
 //all distances are squared
-#define BASE_HEAR_DIST 256
+#define BASE_HEAR_DIST 4096
 #define BASE_NE_DIST 4
 #define BASE_FOLLOW_DIST 100
 //
@@ -22,7 +22,7 @@
 #define SPRITE_SIZE 16
 #define SPEED 1
 //how many npcs are generated
-#define NPC_NUM 15
+#define NPC_NUM 5
 //rmap legend (any numbers < RESERVED_RMAP_NUMBERS are not dereferenced)
 #define RESERVED_RMAP_NUMBERS 100
 
@@ -31,9 +31,9 @@
 #define LOOK_AHEAD_DIST 3
 //in anytimedstar
 //how many unsuccessful loops of findPath or improvePath before resetting or cancelling
-#define FUBAR 256
+#define FUBAR 64
 #define HARD_FUBAR 8
-#define INFLATION_FACTOR 3
+#define INFLATION_FACTOR 10
 //the percent change in updated maps before certain threshholds
 #define MAP_CHANGE_TOLERANCE_LARGE 0.33
 #define MAP_CHANGE_TOLERANCE_SMALL 0

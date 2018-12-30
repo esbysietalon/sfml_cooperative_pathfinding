@@ -335,7 +335,7 @@ void Playable::update_AI()
 	brain->think();
 	//fprintf(stderr, "post-think\n");
 	if (currStep == move_t::NONE) {
-		fprintf(stderr, "%d movement stopped; at (%d,%d)\n", this, getX() / TILE_SIZE, getY() / TILE_SIZE);
+		//fprintf(stderr, "%d movement stopped; at (%d,%d)\n", this, getX() / TILE_SIZE, getY() / TILE_SIZE);
 		currStep = brain->nextStep();
 		if (currStep != move_t::NONE) {
 			int hori = round((float)currStep / 4);
