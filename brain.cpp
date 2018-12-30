@@ -128,11 +128,10 @@ std::deque<move_t>* Brain::pathLook(int x, int y) {
 std::deque<move_t>* Brain::pathFind(int x, int y) {
 	x = (int)round((float)x / TILE_SIZE);
 	y = (int)round((float)y / TILE_SIZE);
-	int sx = _host->getX() / TILE_SIZE;
-	int sy = _host->getY() / TILE_SIZE;
-	fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", sx, sy, x, y);
-	pfp->replanPath(intpair(sx, sy), intpair(x, y));
-	return pfp->findPath(intpair(sx, sy), intpair(x, y));
+	intpair s = _host->moveGoals();
+	fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y);
+	pfp->replanPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
+	return pfp->findPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
 	//return pf->findPath(intpair(sx, sy), intpair(x, y));
 }
 
