@@ -313,6 +313,11 @@ int Playable::getX() {
 int Playable::getY() {
 	return (int)round(_y / TILE_SIZE) * TILE_SIZE;
 }
+
+intpair Playable::moveGoals() {
+	return intpair(moveGoalX, moveGoalY);
+}
+
 void Playable::update_AI()
 {
 	
@@ -330,14 +335,17 @@ void Playable::update_AI()
 	brain->think();
 	//fprintf(stderr, "post-think\n");
 	if (currStep == move_t::NONE) {
+		fprintf(stderr, "%d movement stopped; at (%d,%d)\n", this, getX() / TILE_SIZE, getY() / TILE_SIZE);
 		currStep = brain->nextStep();
 		if (currStep != move_t::NONE) {
 			int hori = round((float)currStep / 4);
 			int vert = currStep - hori * 4;
 			moveGoalX = getX() + hori * TILE_SIZE;
 			moveGoalY = getY() - vert * TILE_SIZE;
+			//fprintf(stderr, "moving from (%d,%d) to (%d,%d) by %d\n", getX() / TILE_SIZE, getY() / TILE_SIZE, moveGoalX / TILE_SIZE, moveGoalY / TILE_SIZE, brain);
 			if (moveGoalX >= MAP_WIDTH * TILE_SIZE || moveGoalX < 0 || moveGoalY >= MAP_HEIGHT * TILE_SIZE || moveGoalY < 0) {
-				fprintf(stderr, "illegal move\n", currStep);
+				fprintf(stderr, "moving from (%d,%d) to (%d,%d) by %d\n", getX() / TILE_SIZE, getY() / TILE_SIZE, moveGoalX / TILE_SIZE, moveGoalY / TILE_SIZE, brain);
+				fprintf(stderr, "illegal move by %d\n", this);
 				currStep = move_t::NONE;
 			}
 		}

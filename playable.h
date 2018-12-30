@@ -57,6 +57,8 @@ public:
 
 	void setFov(std::vector<std::vector<struct intpair>> fov);
 	std::vector<std::vector<struct intpair>> fovRings;
+
+	intpair moveGoals();
 private:
 	Brain* brain;
 

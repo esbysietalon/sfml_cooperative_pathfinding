@@ -80,7 +80,7 @@ Brain::Brain(Playable* target) {
 	
 	memGraph = new Graph(&lemoryMap, LMAP_W, LMAP_H, _host);
 	//pf = new PathFinder(memGraph);
-	pfp = new PathFinderPlus(memGraph, 4);
+	pfp = new PathFinderPlus(memGraph, INFLATION_FACTOR);
 	//printLemory();
 	
 }
@@ -119,18 +119,18 @@ move_t Brain::nextStep() {
 std::deque<move_t>* Brain::pathLook(int x, int y) {
 	x = (int)round((float)x / TILE_SIZE);
 	y = (int)round((float)y / TILE_SIZE);
-	int sx = _host->getX() / TILE_SIZE;
-	int sy = _host->getY() / TILE_SIZE;
-	//fprintf(stderr, "path look is from (%d,%d) to (%d,%d)\n", sx, sy, x, y);
+	intpair s = _host->moveGoals();
+	fprintf(stderr, "path look is from (%d,%d) to (%d,%d); request from %d to %d\n", s.x / TILE_SIZE, s.y / TILE_SIZE, x, y, this, pf);
 	pfp->planMore();
-	return pfp->findPath(intpair(sx, sy), intpair(x, y));
+	//fprintf(stderr, "planned more; now looking\n");
+	return pfp->findPath(intpair(s.x / TILE_SIZE, s.y / TILE_SIZE), intpair(x, y));
 }
 std::deque<move_t>* Brain::pathFind(int x, int y) {
 	x = (int)round((float)x / TILE_SIZE);
 	y = (int)round((float)y / TILE_SIZE);
 	int sx = _host->getX() / TILE_SIZE;
 	int sy = _host->getY() / TILE_SIZE;
-	//fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", sx, sy, x, y);
+	fprintf(stderr, "path find is from (%d,%d) to (%d,%d)\n", sx, sy, x, y);
 	pfp->replanPath(intpair(sx, sy), intpair(x, y));
 	return pfp->findPath(intpair(sx, sy), intpair(x, y));
 	//return pf->findPath(intpair(sx, sy), intpair(x, y));
@@ -252,7 +252,7 @@ void Brain::think() {
 	//fprintf(stderr, "retrieved next thought\n");
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
-		//fprintf(stderr, "follow\n");
+		fprintf(stderr, "follow by %d\n", _host);
 		social = nextThought->target->getSocial();
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			/*if (_currPath != NULL) {
@@ -265,9 +265,11 @@ void Brain::think() {
 			//fprintf(stderr, "%d is target, i am %d\n", nextThought->target, _host);
 			//fprintf(stderr, "%d\n", nextThought->target->getSprite());
 			if (_currPath == NULL || _currPath->empty()) {
+				fprintf(stderr, "find call\n");
 				_currPath = pathFind(nextThought->target->getX(), nextThought->target->getY());
 			}
 			else {
+				fprintf(stderr, "look call\n");
 				std::deque<move_t>().swap(*_currPath);
 				_currPath = pathLook(nextThought->target->getX(), nextThought->target->getY());
 			}
@@ -275,10 +277,10 @@ void Brain::think() {
 			//pathIndex = 0;
 		}
 		
-		//fprintf(stderr, "end follow\n");
+		fprintf(stderr, "end follow\n");
 		break;
 	case order_type_t::MOVE:
-		//fprintf(stderr, "move\n");
+		fprintf(stderr, "move\n");
 		/*if (_currPath != NULL) {
 			std::deque<move_t>().swap(*_currPath);
 			//_currPath->clear();
@@ -290,6 +292,7 @@ void Brain::think() {
 			_currPath = pathFind(nextThought->x, nextThought->y);
 		}
 		else {
+			//fprintf(stderr, "path look\n");
 			std::deque<move_t>().swap(*_currPath);
 			_currPath = pathLook(nextThought->x, nextThought->y);
 		}
@@ -313,10 +316,10 @@ void Brain::think() {
 			queueThought(newThought);
 			//fprintf(stderr, "end move\n");
 		}
-		//fprintf(stderr, "end move\n");
+		fprintf(stderr, "end move\n");
 		break;
 	case order_type_t::SAY:
-		//fprintf(stderr, "say\n");
+		fprintf(stderr, "say\n");
 		
 		//fprintf(stderr, "path find\n");
 		if (_currPath == NULL || _currPath->empty()) {
@@ -356,7 +359,7 @@ void Brain::think() {
 			}
 			queueThought(newThought);
 		}
-		//fprintf(stderr, "end say\n");
+		fprintf(stderr, "end say\n");
 		break;
 	}
 	/*float goalAngle = (float)(distr(generator)) / 1000000.0 * 2 * 3.14159;

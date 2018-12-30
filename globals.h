@@ -24,4 +24,5 @@
 #define FUBAR 256
 #define HARD_FUBAR 8
 #define PERSONAL_SPACE 0
+#define INFLATION_FACTOR 3
 

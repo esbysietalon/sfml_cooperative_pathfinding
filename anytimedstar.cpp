@@ -75,8 +75,9 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 		return tile;
 	move_t dir;
 	intpair nearest = tile;
+	int p = 1;
 	while (!graph->isFree(nearest)) {
-		//fprintf(stderr, "nearest candidate is (%d,%d) [origin is (%d,%d)]\n", nearest.x, nearest.y, origin.x, origin.y);
+		//fprintf(stderr, "nearest candidate is (%d,%d) [origin is (%d,%d)] by %d\n", nearest.x, nearest.y, origin.x, origin.y, this);
 		int normalX = abs(origin.x - nearest.x);
 		int normalY = abs(origin.y - nearest.y);
 		if (normalX == 0)
@@ -84,17 +85,20 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 		if (normalY == 0)
 			normalY = 1;
 		dir = (move_t)((origin.x - nearest.x) / normalX * 4 - (origin.y - nearest.y) / normalY);
-		
+		//fprintf(stderr, "dir is %d\n", dir);
+		intpair lastnearest = intpair(nearest.x, nearest.y);
 		switch (dir) {
 		case move_t::NONE:
-			for (int yp = -1; yp <= 1; yp++) {
-				for (int xp = -1; xp <= 1; xp++) {
-					nearest = intpair(nearest.x + xp, nearest.y + yp);
+			for (int yp = -1 * p; yp <= p; yp++) {
+				for (int xp = -1 * p; xp <= p; xp++) {
+					nearest = intpair(lastnearest.x + xp, lastnearest.y + yp);
 					if (graph->isFree(nearest)) {
 						return nearest;
 					}
 				}
 			}
+			nearest = intpair(lastnearest.x, lastnearest.y);
+			p++;
 			break;
 		case move_t::N:
 			nearest = intpair(nearest.x, nearest.y - 1);
@@ -121,14 +125,18 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 			nearest = intpair(nearest.x - 1, nearest.y + 1);
 			break;
 		}
+		//fprintf(stderr, "nearest candidate is (%d,%d)\n", tile.x, tile.y, nearest.x, nearest.y);
 	}
+	//if (tile != nearest)
+		
 	return nearest;
 	//dir is what direction to face standing from origin looking at tile
 }
 
 std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 	end = getNearestFree(end, start);
-	//fprintf(stderr, "moving from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
+	//start = getNearestFree(start, start);
+	fprintf(stderr, "finding path from (%d,%d) to (%d,%d)\n", start.x, start.y, end.x, end.y);
 	s_start = start;
 	s_goal = end;
 	std::deque<move_t>* path = new std::deque<move_t>();
@@ -165,16 +173,18 @@ std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 			}
 		}
 		if (nextTile == intpair(-1, -1) && resetCount > HARD_FUBAR) {
-			fprintf(stderr, "path is fubar; ignoring instruction\n", this);
+			fprintf(stderr, "path is hard fubar; ignoring instruction\n", this);
 			resetCount = 0;
 			return nullptr;
 		}
+		fprintf(stderr, "nextTile is (%d,%d) by %d\n", nextTile.x, nextTile.y, this);
 		move_t nextMove = (move_t)(-1 * (currTile.x - nextTile.x) * 4 + currTile.y - nextTile.y);
-	
+
 		path->push_back(nextMove);
 		currTile = nextTile;
 	}
 	resetCount = 0;
+	//fprintf(stderr, "returning path by %d\n", this);
 	return path;
 }
 
@@ -238,7 +248,7 @@ void PathFinderPlus::planMore() {
 			updateState(u);
 		}
 	}
-	while (epsilon > 1) {
+	if (epsilon > 1) {
 		epsilon--;
 		//fprintf(stderr, "in plan more loop\n");
 		if (open->size() > 0) {
@@ -299,7 +309,7 @@ void PathFinderPlus::improvePath() {
 		if (stickCount > FUBAR) {
 			fprintf(stderr, "FUBARED in improvePath; checking if possible\n");
 			if (g(s_start) == INFINITY) {
-				fprintf(stderr, "impossible path; aborting\n");
+				fprintf(stderr, "impossible path from (%d,%d) to (%d,%d); aborting\n", s_start.x, s_start.y, s_goal.x, s_goal.y);
 				resetCount = HARD_FUBAR + 1;
 				return;
 			}
