@@ -368,6 +368,7 @@ void Playable::update_AI()
 		//fprintf(stderr, "end move\n");
 		//fprintf(stderr, "currX: %d, currY: %d, new moveGoalX: %d, new moveGoalY: %d, hori: %d, vert: %d\n", getX(), getY(), moveGoalX, moveGoalY, hori, vert);
 	}
+	//fprintf(stderr, "%d (%d,%d)\n", brain, moveGoalX / TILE_SIZE, moveGoalY / TILE_SIZE);
 	//fprintf(stderr, "currstep is %d\n", currStep);
 	
 	

@@ -48,13 +48,14 @@ void Core::update() {
 			fprintf(stderr, "%d ", std::min(1,(int)(rMap[i + j * MAP_WIDTH]) % 10));
 		}
 		fprintf(stderr, "\n");
-	}
-	fprintf(stderr, "\n\n");*/
+	}*/
+	//fprintf(stderr, "\n\n");
 	for (int i = 0; i < characters.size(); i++) {
+		//fprintf(stderr, "%d: \n\n", i);
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
-		if (i == 0)
-			characters.at(i)->printLemory();
+		
+		//characters.at(i)->printLemory();
 		if (characters.at(i)->isControlled()) {
 			//fprintf(stderr, "-pl");
 			characters.at(i)->update();
@@ -63,8 +64,24 @@ void Core::update() {
 			//fprintf(stderr, "-ai");
 			characters.at(i)->update_AI();
 		}
-		
+		for (int j = 0; j < characters.size(); j++) {
+			if (i == j)
+				continue;
+			if (characters.at(i)->moveGoals() == characters.at(j)->moveGoals()) {
+				fprintf(stderr, "%d and %d collision at (%d,%d)\n", i, j, characters.at(i)->moveGoals().x / TILE_SIZE, characters.at(i)->moveGoals().y / TILE_SIZE);
+				fprintf(stderr, "\n\n");
+			}
+			if (characters.at(i)->moveGoals() == intpair(characters.at(j)->getX(), characters.at(j)->getY())) {
+				fprintf(stderr, "%d and %d collision at (%d,%d)-\n", i, j, characters.at(i)->moveGoals().x / TILE_SIZE, characters.at(i)->moveGoals().y / TILE_SIZE);
+				fprintf(stderr, "\n\n");
+			}
+			if (characters.at(i)->getX() == characters.at(j)->getX() && characters.at(i)->getY() == characters.at(j)->getY()) {
+				fprintf(stderr, "%d and %d collision at (%d,%d)\n", i, j, characters.at(i)->getX(), characters.at(i)->getY());
+				fprintf(stderr, "\n\n");
+			}
+		}
 	}
+	
 	//fprintf(stderr, "\nfollowers:%d\n", followers);
 	/*if (followers == NPC_NUM) {
 		fprintf(stderr, "WE DID IT\n");

@@ -4,11 +4,13 @@
 #include "vertEntry.h"
 #include <deque>
 #include <set>
+#include "brain.h"
 
 enum move_t;
 
 class Graph;
 class Playable;
+class Brain;
 
 class PathFinderPlus {
 public:
@@ -21,6 +23,7 @@ public:
 	std::deque<move_t>* findPath(intpair start, intpair end);
 
 	void printMap();
+	void setBrain(Brain* brain);
 private:
 	void reset(intpair start, intpair end);
 	void improvePath();
@@ -75,4 +78,6 @@ private:
 
 
 	int resetCount = 0;
+
+	Brain* thisBrain;
 };

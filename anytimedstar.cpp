@@ -132,7 +132,9 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 	return nearest;
 	//dir is what direction to face standing from origin looking at tile
 }
-
+void PathFinderPlus::setBrain(Brain* brain) {
+	thisBrain = brain;
+}
 std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 	end = getNearestFree(end, start);
 	//start = getNearestFree(start, start);
@@ -143,6 +145,7 @@ std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 	intpair currTile = s_start;
 	
 	int stickCounter = 0;
+	//fprintf(stderr, "currTile is (%d,%d) by %d\n", currTile.x, currTile.y, thisBrain);
 	while (currTile != s_goal) {
 		if (stickCounter > FUBAR) {
 			//fprintf(stderr, "FUBARED in findPath; checking if possible\n");
@@ -177,14 +180,15 @@ std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 			resetCount = 0;
 			return nullptr;
 		}
-		//fprintf(stderr, "nextTile is (%d,%d) by %d\n", nextTile.x, nextTile.y, this);
+		//fprintf(stderr, "nextTile is (%d,%d) by %d\n", nextTile.x, nextTile.y, thisBrain);
 		move_t nextMove = (move_t)(-1 * (currTile.x - nextTile.x) * 4 + currTile.y - nextTile.y);
 
 		path->push_back(nextMove);
 		currTile = nextTile;
 	}
 	resetCount = 0;
-	//fprintf(stderr, "returning path by %d\n", this);
+	//fprintf(stderr, "returning path (%d)\n", path->size());
+
 	return path;
 }
 
@@ -247,6 +251,7 @@ void PathFinderPlus::planMore() {
 			intpair u = latestChanges.at(i);
 			updateState(u);
 		}
+		//fprintf(stderr, "finished updating state\n");
 	}
 	if (epsilon > 1) {
 		epsilon--;

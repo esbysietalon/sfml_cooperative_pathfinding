@@ -102,6 +102,7 @@ Brain::Brain(Playable* target) {
 	memGraph = new Graph(&lemoryMap, LMAP_W, LMAP_H, _host);
 	//pf = new PathFinder(memGraph);
 	pfp = new PathFinderPlus(memGraph, INFLATION_FACTOR);
+	pfp->setBrain(this);
 	//printLemory();
 	
 }
@@ -288,15 +289,21 @@ void Brain::think() {
 	//fprintf(stderr, "retrieved next thought\n");
 	struct order_t* newSayThought = new struct order_t;
 	Playable* newSayTarget = NULL;
+	intpair maintain = _host->moveGoals();
+
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
-		//fprintf(stderr, "follow by %d\n", _host);
+		//fprintf(stderr, "follow\n");
 		social = 0;
 		//if (nextThought->target->getSocial() == 0) {
 			//social = originalSoc;
 			//_thoughtQueue->clear();
 			//break;
 		//}
+		if (_currPath != NULL)
+			std::deque<move_t>().swap(*_currPath);
+		
+		_currPath = pathLook(maintain.x, maintain.y);
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			/*if (_currPath != NULL) {
 				std::deque<move_t>().swap(*_currPath);
@@ -307,15 +314,19 @@ void Brain::think() {
 			//fprintf(stderr, "pathfind\n");
 			//fprintf(stderr, "%d is target, i am %d\n", nextThought->target, _host);
 			//fprintf(stderr, "%d\n", nextThought->target->getSprite());
+			
 			if (_currPath == NULL || _currPath->empty()) {
 				//fprintf(stderr, "find call\n");
 				_currPath = pathFind(nextThought->target->getX(), nextThought->target->getY());
 			}
 			else {
-				//fprintf(stderr, "look call\n");
 				std::deque<move_t>().swap(*_currPath);
 				_currPath = pathLook(nextThought->target->getX(), nextThought->target->getY());
 			}
+			//else {
+				//fprintf(stderr, "look call\n");
+				
+			//}
 			//fprintf(stderr, "end pathfind\n");
 			//pathIndex = 0;
 		}
@@ -330,15 +341,18 @@ void Brain::think() {
 			//_currPath->shrink_to_fit();
 			//delete _currPath;
 		}*/
+		
 		if (_currPath == NULL || _currPath->empty()) {
 			//fprintf(stderr, "path empty - recalculate\n");
 			_currPath = pathFind(nextThought->x, nextThought->y);
 		}
 		else {
-			//fprintf(stderr, "path look\n");
 			std::deque<move_t>().swap(*_currPath);
 			_currPath = pathLook(nextThought->x, nextThought->y);
-		}
+		}//else {
+			//fprintf(stderr, "path look\n");
+			
+		//}
 		//fprintf(stderr, "distSq %f\n", distSq);
 		//fprintf(stderr, "_sensedEntities(%d)", _sensedEntities.size());
 		if (_sensedEntities.size() > 0) {
@@ -389,14 +403,19 @@ void Brain::think() {
 	case order_type_t::SAY:
 		//fprintf(stderr, "say\n");
 		
-		//fprintf(stderr, "path find\n");
+		
+		
+		
 		if (_currPath == NULL || _currPath->empty()) {
 			_currPath = pathFind(nextThought->target->getX(), nextThought->target->getY());
 		}
 		else {
 			std::deque<move_t>().swap(*_currPath);
 			_currPath = pathLook(nextThought->target->getX(), nextThought->target->getY());
-		}
+		}		//else {
+			
+		//}
+		
 		if (distSq <= BASE_HEAR_DIST) {
 			//fprintf(stderr, "do say\n");
 			say(nextThought->target);
