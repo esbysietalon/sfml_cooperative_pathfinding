@@ -12,7 +12,7 @@
 //all distances are squared
 #define BASE_HEAR_DIST 4096
 #define BASE_NE_DIST 4
-#define BASE_FOLLOW_DIST 100
+#define BASE_FOLLOW_DIST 1024
 //
 #define BASE_LOS_CONE 3.14159 / 4
 //sight range in tiles
@@ -22,7 +22,7 @@
 #define SPRITE_SIZE 16
 #define SPEED 1
 //how many npcs are generated
-#define NPC_NUM 4
+#define NPC_NUM 9
 //rmap legend (any numbers < RESERVED_RMAP_NUMBERS are not dereferenced)
 #define RESERVED_RMAP_NUMBERS 100
 

@@ -294,7 +294,7 @@ void Brain::think() {
 	switch (nextThought->type) {
 	case order_type_t::FOLLOW:
 		//fprintf(stderr, "follow\n");
-		social = 0;
+		social = nextThought->target->getSocial();
 		//if (nextThought->target->getSocial() == 0) {
 			//social = originalSoc;
 			//_thoughtQueue->clear();

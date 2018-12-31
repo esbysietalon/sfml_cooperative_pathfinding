@@ -33,7 +33,7 @@ void Core::update() {
 		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
 			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
 				int index = x + ix + (y + iy) * MAP_WIDTH;
-				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
+				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && ((rMap[index] == 0) || (ix == 0 && iy == 0)))
 					rMap[index] = characters.at(i);
 			}
 		}
