@@ -10,7 +10,7 @@
 void Core::update() {
 	for (int j = 0; j < MAP_HEIGHT; j++) {
 		for (int i = 0; i < MAP_WIDTH; i++) {
-			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) != tile_t::GAP) ? rmap::EMPTY : rmap::TERRAIN);
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
@@ -173,18 +173,23 @@ void Core::load() {
 
 
 	//load floor
-	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES; i++) {
+	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES - 1; i++) {
 		std::string filePath = "resources/tiles/floor_" + std::to_string(i + 1) + ".png";
 		sf::Texture* _tileTexture = graphics->loadImage(filePath);
 		terrain->registerTile((tile_t)i, _tileTexture);
 	}
+
+	std::string filePath = "resources/tiles/gaptile.png";
+	sf::Texture* _tileTexture = graphics->loadImage(filePath);
+	terrain->registerTile(tile_t::GAP, _tileTexture);
+	
 	map = (sf::Sprite**)malloc(sizeof(sf::Sprite*) * MAP_HEIGHT * MAP_WIDTH);
 	for (int j = 0; j < MAP_HEIGHT; j++) {
 		for (int i = 0; i < MAP_WIDTH; i++) {
 			map[i + j * MAP_WIDTH] = new sf::Sprite;
 			map[i + j * MAP_WIDTH]->setTexture(*(terrain->getTileTAt(i, j)));
 			map[i + j * MAP_WIDTH]->setPosition(i * 16, j * 16);
-			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
+			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) != tile_t::GAP) ? rmap::EMPTY : rmap::TERRAIN);
 		}
 	}
 

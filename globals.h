@@ -42,4 +42,7 @@
 //the additional tiles around actual position considered taken up by sprites
 #define PERSONAL_SPACE 1
 
+#define GAP_BLOCK_NUM 5
+#define GAP_BLOCK_SIZE 10
+
 
