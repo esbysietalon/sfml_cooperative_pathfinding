@@ -55,7 +55,7 @@ void Core::update() {
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
 		
-		//characters.at(i)->printLemory();
+		characters.at(i)->printLemory();
 		if (characters.at(i)->isControlled()) {
 			//fprintf(stderr, "-pl");
 			characters.at(i)->update();

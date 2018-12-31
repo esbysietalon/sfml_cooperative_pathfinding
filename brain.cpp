@@ -225,7 +225,7 @@ void Brain::printLemory() {
 			else if (lemoryMap[j + i * LMAP_W] == _host) {
 				fprintf(stderr, "m ");
 			}
-			else if (lemoryMap[j + i * LMAP_W] == (Playable*)2) {
+			else if (lemoryMap[j + i * LMAP_W] == (Playable*)1) {
 				fprintf(stderr, "* ");
 			}
 			else {

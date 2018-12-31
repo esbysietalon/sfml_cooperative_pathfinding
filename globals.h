@@ -22,7 +22,7 @@
 #define SPRITE_SIZE 16
 #define SPEED 1
 //how many npcs are generated
-#define NPC_NUM 9
+#define NPC_NUM 0
 //rmap legend (any numbers < RESERVED_RMAP_NUMBERS are not dereferenced)
 #define RESERVED_RMAP_NUMBERS 100
 
@@ -42,7 +42,8 @@
 //the additional tiles around actual position considered taken up by sprites
 #define PERSONAL_SPACE 1
 
-#define GAP_BLOCK_NUM 5
-#define GAP_BLOCK_SIZE 10
+#define GAP_BLOCK_NUM 15
+#define GAP_BLOCK_WIDTH 40
+#define GAP_BLOCK_HEIGHT 1
 
 
