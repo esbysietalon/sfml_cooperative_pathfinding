@@ -22,7 +22,7 @@
 #define SPRITE_SIZE 16
 #define SPEED 1
 //how many npcs are generated
-#define NPC_NUM 4
+#define NPC_NUM 9
 //rmap legend (any numbers < RESERVED_RMAP_NUMBERS are not dereferenced)
 #define RESERVED_RMAP_NUMBERS 100
 

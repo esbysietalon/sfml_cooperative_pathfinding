@@ -59,6 +59,8 @@ public:
 	std::vector<std::vector<struct intpair>> fovRings;
 
 	intpair moveGoals();
+	void printLemory();
+	//void printMap();
 private:
 	Brain* brain;
 

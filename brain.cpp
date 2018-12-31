@@ -35,12 +35,13 @@ void Brain::see() {
 	}
 	//check in rings of sight around playable
 	for (int i = 0; i < _host->fovRings.size(); i++) {
+		//fprintf(stderr, "ring %d:\n", i);
 		std::vector<intpair> currRing = _host->fovRings.at(i);
 		for (int j = 0; j < _host->fovRings.at(i).size(); j++) {
 			intpair currPair = currRing.at(j);
 			int x = currPair.x;
 			int y = currPair.y;
-			//fprintf(stderr, "%d  and  %d\n", x, y);
+			//fprintf(stderr, "(%d,%d)\n", x, y);
 			int cx = x + _host->getX() / TILE_SIZE;
 			int cy = y + _host->getY() / TILE_SIZE;
 			int smx = (x + BASE_SIGHT_RANGE);
@@ -50,11 +51,15 @@ void Brain::see() {
 				//if((*rmap)[cx + cy * MAP_WIDTH] != 0 && (*rmap)[cx + cy * MAP_WIDTH] != _host)
 					
 				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
-				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS && sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] != _host) {
-					if (uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)])) {
+				
+				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS) {
+					if (uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]) && sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] != _host) {
 						//fprintf(stderr, "and i see %d\n", (*rmap)[cx + cy * MAP_WIDTH]->getSocial());
 						_sensedEntities.emplace(_sensedEntities.end(), sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]);
 					}
+				}
+				else {
+					//sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (Playable*) 2;
 				}
 				//fprintf(stderr, "x: %d y: %d xlim: %d ylim: %d\n", (x + BASE_SIGHT_RANGE), (y + BASE_SIGHT_RANGE), 2 * (BASE_SIGHT_RANGE + 1), 2 * (BASE_SIGHT_RANGE + 1));
 			}
@@ -212,7 +217,20 @@ void Brain::meander(int* goalX, int* goalY) {
 void Brain::printLemory() {
 	for (int i = 0; i < LMAP_H; i++) {
 		for (int j = 0; j < LMAP_W; j++) {
-			fprintf(stderr, "%d ", lemoryMap[j + i * LMAP_W]);
+			int unit = (int)lemoryMap[j + i * LMAP_W];
+			if (unit > RESERVED_RMAP_NUMBERS && lemoryMap[j + i * LMAP_W] != _host) {
+				fprintf(stderr, "%d ", unit % 10);
+			}
+			else if (lemoryMap[j + i * LMAP_W] == _host) {
+				fprintf(stderr, "m ");
+			}
+			else if (lemoryMap[j + i * LMAP_W] == (Playable*)2) {
+				fprintf(stderr, "* ");
+			}
+			else {
+				fprintf(stderr, "- ");
+			}
+			
 		}
 		fprintf(stderr, "\n");
 	}
@@ -412,6 +430,7 @@ void Brain::think() {
 		//fprintf(stderr, "end say\n");
 		break;
 	}
+
 	/*float goalAngle = (float)(distr(generator)) / 1000000.0 * 2 * 3.14159;
 	int dist = distr(generator) % 250 + 50;
 	

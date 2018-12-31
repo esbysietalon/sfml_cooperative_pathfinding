@@ -19,6 +19,8 @@ public:
 	void replanPath(intpair start, intpair end); //this indicates the start of a new path, may also be called if significant edge changes occur, needs to be called before anything else
 	void planMore(); 
 	std::deque<move_t>* findPath(intpair start, intpair end);
+
+	void printMap();
 private:
 	void reset(intpair start, intpair end);
 	void improvePath();

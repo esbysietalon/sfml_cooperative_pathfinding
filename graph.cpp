@@ -33,8 +33,6 @@ float Graph::costAdj(intpair start, intpair end) {
 	//if ((start.x == 0 && start.y == 0) || (end.x == 0 && end.y == 0)) {
 		//fprintf(stderr, "HEAR HEAR: (*rmap)[end.x + end.y * mapW] = %d and host = %d\n", (*rmap)[end.x + end.y * mapW], host);
 	//}
-	if (start == end)
-		return 0;
 	if (abs(start.x - end.x) > 1 || abs(start.y - end.y) > 1) {
 		//fprintf(stderr, "am i in here?\n");
 		return INFINITY;
@@ -43,7 +41,11 @@ float Graph::costAdj(intpair start, intpair end) {
 		return INFINITY;
 	}
 	//fprintf(stderr, "accessing rmap at %d\n", end.x + end.y * mapW);
-	if ((*rmap)[end.x + end.y * mapW] != 0 && (*rmap)[end.x + end.y * mapW] != host) {
+	if ((*rmap)[end.x + end.y * mapW] == (Playable*)3 || ((int)(*rmap)[end.x + end.y * mapW] > RESERVED_RMAP_NUMBERS && (*rmap)[end.x + end.y * mapW] != host)) {
+		//fprintf(stderr, "or am i in here?\n");
+		return INFINITY;
+	}
+	if ((*rmap)[start.x + start.y * mapW] == (Playable*)3 || ((int)(*rmap)[start.x + start.y * mapW] > RESERVED_RMAP_NUMBERS && (*rmap)[start.x + start.y * mapW] != host)) {
 		//fprintf(stderr, "or am i in here?\n");
 		return INFINITY;
 	}

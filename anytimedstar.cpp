@@ -346,6 +346,32 @@ void PathFinderPlus::improvePath() {
 		}
 		
 	}
+	/*for (int j = 0; j < graph->height(); j++) {
+		for (int i = 0; i < graph->width(); i++) {
+			intpair tile = intpair(i, j);
+			
+			float cScore = INFINITY;
+			int len;
+			intpair* succ = new intpair[8];
+
+			graph->succ(tile, &succ, &len);
+			for (int i = 0; i < len; i++) {
+				float currC = c(tile, succ[i]);
+				if (currC < cScore) {
+					cScore = currC;
+				}
+			}
+
+			if (cScore == INFINITY) {
+				fprintf(stderr, "+ ");
+			}
+			else {
+				fprintf(stderr, ". ");
+			}
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n\n");*/
 }
 
 void PathFinderPlus::reset(intpair start, intpair end)

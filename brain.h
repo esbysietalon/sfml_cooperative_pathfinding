@@ -46,6 +46,9 @@ public:
 	void setRMap(Playable*** rMap);
 	
 	bool uniqueSight(Playable* sight);
+
+	void printLemory();
+	//void printMap();
 private:
 	int memoryMap[LMAP_W * LMAP_H];
 	Playable** sightMap;
@@ -55,7 +58,7 @@ private:
 	int lemX = LMAP_W / 2;
 	int lemY = LMAP_H / 2;
 
-	void printLemory();
+	
 	
 	Playable* _host;
 	

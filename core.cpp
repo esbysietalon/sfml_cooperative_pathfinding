@@ -13,12 +13,9 @@ void Core::update() {
 			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) > 3) ? rmap::EMPTY : rmap::EMPTY);
 		}
 	}
-	int followers = 0;
 	for (size_t i = 0; i < characters.size(); i++) {
 		//fprintf(stderr, "%d:", characters.at(i)->getSocial());
-		if (characters.at(i)->getSocial() == 0) {
-			followers++;
-		}
+		
 		int x = characters.at(i)->moveGoals().x / TILE_SIZE;
 		int y = characters.at(i)->moveGoals().y / TILE_SIZE;
 		//fprintf(stderr, "(%d,%d)", x, y);
@@ -30,15 +27,34 @@ void Core::update() {
 			}
 		}
 
+		x = characters.at(i)->getX() / TILE_SIZE;
+		y = characters.at(i)->getY() / TILE_SIZE;
+		
+		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
+			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
+				int index = x + ix + (y + iy) * MAP_WIDTH;
+				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
+					rMap[index] = characters.at(i);
+			}
+		}
 		//fprintf(stderr, "%d - i\n", i);
 		
 		//fprintf(stderr, "||%d", i);
 		//fprintf(stderr, "%d - i\n", i);
 	}
+
+	/*for (int j = 0; j < MAP_HEIGHT; j++) {
+		for (int i = 0; i < MAP_WIDTH; i++) {
+			fprintf(stderr, "%d ", std::min(1,(int)(rMap[i + j * MAP_WIDTH]) % 10));
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n\n");*/
 	for (int i = 0; i < characters.size(); i++) {
 		characters.at(i)->emptyRegistry();
 		characters.at(i)->see();
-
+		if (i == 0)
+			characters.at(i)->printLemory();
 		if (characters.at(i)->isControlled()) {
 			//fprintf(stderr, "-pl");
 			characters.at(i)->update();
@@ -47,12 +63,12 @@ void Core::update() {
 			//fprintf(stderr, "-ai");
 			characters.at(i)->update_AI();
 		}
+		
 	}
 	//fprintf(stderr, "\nfollowers:%d\n", followers);
-	if (followers == NPC_NUM) {
+	/*if (followers == NPC_NUM) {
 		fprintf(stderr, "WE DID IT\n");
-
-	}
+	}*/
 }
 
 void Core::calculateCFov() {

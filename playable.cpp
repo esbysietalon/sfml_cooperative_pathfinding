@@ -318,9 +318,16 @@ intpair Playable::moveGoals() {
 	return intpair(moveGoalX, moveGoalY);
 }
 
+void Playable::printLemory()
+{
+	brain->printLemory();
+}
+
+
+
 void Playable::update_AI()
 {
-	
+
 	//THINKING - BRAIN ACTIVITY
 	/*int randInt = rand();
 	if (actionTimer.getElapsedTime().asSeconds() * 50 > randInt) {
@@ -334,6 +341,10 @@ void Playable::update_AI()
 	//fprintf(stderr, "pre-think\n");
 	brain->think();
 	//fprintf(stderr, "post-think\n");
+	if (getX() < 0 || getX() > MAP_WIDTH * TILE_SIZE || getY() < 0 || getY() > MAP_HEIGHT * TILE_SIZE){
+		fprintf(stderr, "OUT OF BOUNDS\n");
+		fprintf(stderr, "someone stop this squid\n");
+	}
 	if (currStep == move_t::NONE) {
 		//fprintf(stderr, "%d movement stopped; at (%d,%d)\n", this, getX() / TILE_SIZE, getY() / TILE_SIZE);
 		currStep = brain->nextStep();
