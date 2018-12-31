@@ -45,10 +45,10 @@ float Graph::costAdj(intpair start, intpair end) {
 		//fprintf(stderr, "or am i in here?\n");
 		return INFINITY;
 	}
-	if ((*rmap)[start.x + start.y * mapW] == (Playable*)3 || ((int)(*rmap)[start.x + start.y * mapW] > RESERVED_RMAP_NUMBERS && (*rmap)[start.x + start.y * mapW] != host)) {
+	/*if ((*rmap)[start.x + start.y * mapW] == (Playable*)3 || ((int)(*rmap)[start.x + start.y * mapW] > RESERVED_RMAP_NUMBERS && (*rmap)[start.x + start.y * mapW] != host)) {
 		//fprintf(stderr, "or am i in here?\n");
 		return INFINITY;
-	}
+	}*/
 	int distX = start.x - end.x;
 	int distY = start.y - end.y;
 	return sqrt(distX * distX + distY * distY);

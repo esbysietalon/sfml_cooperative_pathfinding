@@ -361,11 +361,11 @@ void PathFinderPlus::improvePath() {
 			
 			float cScore = INFINITY;
 			int len;
-			intpair* succ = new intpair[8];
+			intpair* pred = new intpair[8];
 
-			graph->succ(tile, &succ, &len);
+			graph->pred(tile, &pred, &len);
 			for (int i = 0; i < len; i++) {
-				float currC = c(tile, succ[i]);
+				float currC = c(pred[i], tile);
 				if (currC < cScore) {
 					cScore = currC;
 				}
