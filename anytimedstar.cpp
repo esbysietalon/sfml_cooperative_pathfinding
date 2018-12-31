@@ -135,6 +135,10 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 void PathFinderPlus::setBrain(Brain* brain) {
 	thisBrain = brain;
 }
+bool PathFinderPlus::isFree(intpair node)
+{
+	return graph->isFree(node);
+}
 std::deque<move_t>* PathFinderPlus::findPath(intpair start, intpair end) {
 	end = getNearestFree(end, start);
 	//start = getNearestFree(start, start);

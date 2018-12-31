@@ -300,10 +300,12 @@ void Brain::think() {
 			//_thoughtQueue->clear();
 			//break;
 		//}
-		if (_currPath != NULL)
-			std::deque<move_t>().swap(*_currPath);
-		
-		_currPath = pathLook(maintain.x, maintain.y);
+		if (!pfp->isFree(maintain)) {
+			if (_currPath != NULL)
+				std::deque<move_t>().swap(*_currPath);
+
+			_currPath = pathLook(maintain.x, maintain.y);
+		}
 		if (distSq > BASE_FOLLOW_DIST * (1 + 100 * randCoeff)) {
 			/*if (_currPath != NULL) {
 				std::deque<move_t>().swap(*_currPath);

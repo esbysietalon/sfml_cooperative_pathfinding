@@ -24,6 +24,7 @@ public:
 
 	void printMap();
 	void setBrain(Brain* brain);
+	bool isFree(intpair node);
 private:
 	void reset(intpair start, intpair end);
 	void improvePath();
