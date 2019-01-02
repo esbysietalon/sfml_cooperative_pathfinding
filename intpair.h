@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 struct intpair {
 	intpair(int i = 0, int j = 0) {
 		x = i;
@@ -19,4 +20,12 @@ struct intpair {
 		return !(*this == rhs);
 	}
 	int x, y;
+};
+
+struct fov_data {
+	fov_data(intpair pt = intpair(0, 0)) {
+		point = pt;
+	}
+	intpair point;
+	std::vector<intpair> points;
 };

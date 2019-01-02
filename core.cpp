@@ -131,6 +131,7 @@ for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 				listed.push_back(point);
 				newRing.emplace_back(point);
 				ringLength++;
+				
 				//fprintf(fov_file, "newRing%d->emplace(newRing%d.end(), intpair(%d, %d));\n", rad, rad, point.x, point.y);
 			}
 			//}
