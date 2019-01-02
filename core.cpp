@@ -93,7 +93,11 @@ void Core::calculateCFov() {
 	//FILE* fov_file = fopen("cfov.txt", "w");
 	//fclose(fov_file);
 //fov_file = fopen("cfov.txt", "a+");
-for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
+	/*int* ringList = new int[BASE_SIGHT_RANGE * 2 + 2];
+	for (int i = 0; i < BASE_SIGHT_RANGE * 2 + 2; i++) {
+		ringList[i] = 0;
+	}*/
+	for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 	//fprintf(fov_file, "\nstd::vector<struct intpair>* newRing%d = new std::vector<struct intpair>();\n", rad);
 	int ringLength = 0;
 	int skipDist = (int)((rad / sqrt(2)));
@@ -127,7 +131,9 @@ for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 					break;
 				}
 			}
-			if (!notListed) {
+			//if(ringList[(x+BASE_SIGHT_RANGE+1) + (y+BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1)] == 0){
+			if(!notListed){
+				//ringList[(x + BASE_SIGHT_RANGE+1) + (y + BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE + 1)] = 1;
 				listed.push_back(point);
 				newRing.emplace_back(point);
 				ringLength++;
@@ -136,8 +142,9 @@ for (int rad = 0; rad <= BASE_SIGHT_RANGE; rad++) {
 			}
 			//}
 		}
+		
 	}
-	//fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
+	fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
 	cFovRings.emplace_back(newRing);
 	//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
 	//fprintf(stderr, "%d\n", rad);

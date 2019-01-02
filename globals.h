@@ -17,6 +17,8 @@
 #define BASE_LOS_CONE 3.14159 / 4
 //sight range in tiles
 #define BASE_SIGHT_RANGE 17
+//needs to be recalculated everytime
+#define MAX_RING_LEN 116
 
 #define TILE_SIZE 16
 #define SPRITE_SIZE 16

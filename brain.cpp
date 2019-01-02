@@ -34,6 +34,10 @@ void Brain::see() {
 		sightMap[i] = 0;
 	}
 	//check in rings of sight around playable
+	int* seeable = new int[(BASE_SIGHT_RANGE+1)*MAX_RING_LEN];
+	for (int i = 0; i < (BASE_SIGHT_RANGE + 1)*MAX_RING_LEN; i++) {
+		seeable[i] = 0;
+	}
 	for (int i = 0; i < _host->fovRings.size(); i++) {
 		//fprintf(stderr, "ring %d:\n", i);
 		std::vector<intpair> currRing = _host->fovRings.at(i);
@@ -41,6 +45,7 @@ void Brain::see() {
 			intpair currPair = currRing.at(j);
 			int x = currPair.x;
 			int y = currPair.y;
+			seeable[j + i * MAX_RING_LEN] = 1;
 			//fprintf(stderr, "(%d,%d)\n", x, y);
 			int cx = x + _host->getX() / TILE_SIZE;
 			int cy = y + _host->getY() / TILE_SIZE;
@@ -77,6 +82,15 @@ void Brain::see() {
 			}
 		}
 	}
+
+	/*for (int i = 0; i < BASE_SIGHT_RANGE+1; i++) {
+		for (int j = 0; j < MAX_RING_LEN; j++) {
+			fprintf(stderr, "%d ", visited[j + i * MAX_RING_LEN]);
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n\n");*/
+	
 	//fprintf(stderr, "i saw %d things\n", _sensedEntities.size());
 	//fprintf(stderr, "brain's thought q size is %d\n", brain->_thoughtQueue.size());
 }
