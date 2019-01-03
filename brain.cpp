@@ -57,7 +57,7 @@ void Brain::see() {
 			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
 				//if((*rmap)[cx + cy * MAP_WIDTH] != 0 && (*rmap)[cx + cy * MAP_WIDTH] != _host)
 
-				if (blockRange->inRange(floatrange(data.oAng, data.eAng)) < 0.10) {
+				if (blockRange->inRange(floatrange(data.oAng, data.eAng)) < VISIBILITY) {
 					sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (*rmap)[cx + cy * MAP_WIDTH];
 					if ((*rmap)[cx + cy * MAP_WIDTH] == (Playable*) rmap::TERRAIN) {
 						//fprintf(stderr, "add (%d,%d) [%f,%f]\n", currPair.x, currPair.y, data.oAng, data.eAng);
@@ -65,7 +65,7 @@ void Brain::see() {
 					}
 				}
 				else {
-					//sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (Playable*)3;
+					//sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (Playable*)2;
 					//fprintf(stderr, "br: %f\n", blockRange->inRange(floatrange(data.oAng, data.eAng)));
 					continue;
 				}
@@ -256,7 +256,7 @@ void Brain::printLemory() {
 			else if (lemoryMap[j + i * LMAP_W] == (Playable*)1) {
 				fprintf(stderr, "* ");
 			}
-			else if (lemoryMap[j + i * LMAP_W] == (Playable*)3) {
+			else if (lemoryMap[j + i * LMAP_W] == (Playable*)2) {
 				fprintf(stderr, "# ");
 			}else {
 				fprintf(stderr, "- ");
