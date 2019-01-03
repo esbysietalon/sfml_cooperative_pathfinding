@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "globals.h"
 struct intpair {
 	intpair(int i = 0, int j = 0) {
 		x = i;
@@ -27,5 +28,19 @@ struct fov_data {
 		point = pt;
 	}
 	intpair point;
-	std::vector<intpair> points;
+	float oAng, eAng; //origin angle edge angle 
+};
+
+struct floatrange {
+	floatrange(double a = 0, double b = 0) {
+		sAng = a;
+		eAng = b;
+		if (sAng < 0) {
+			sAng += 2 * PI;
+		}
+		if (eAng < 0) {
+			eAng += 2 * PI;
+		}
+	}
+	double sAng, eAng;
 };

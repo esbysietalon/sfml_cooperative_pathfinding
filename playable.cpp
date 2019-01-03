@@ -60,7 +60,7 @@ int intpow(int base, int exponent) {
 	return out;
 }
 
-void Playable::setFov(std::vector<std::vector<struct intpair>> fov) {
+void Playable::setFov(std::vector<std::vector<fov_data>> fov) {
 	fovRings.swap(fov);
 }
 

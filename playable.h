@@ -55,8 +55,8 @@ public:
 
 	void setSocial(int social);
 
-	void setFov(std::vector<std::vector<struct intpair>> fov);
-	std::vector<std::vector<struct intpair>> fovRings;
+	void setFov(std::vector<std::vector<fov_data>> fov);
+	std::vector<std::vector<fov_data>> fovRings;
 
 	intpair moveGoals();
 	void printLemory();

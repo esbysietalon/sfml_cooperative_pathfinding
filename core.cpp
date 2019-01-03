@@ -89,7 +89,7 @@ void Core::update() {
 }
 
 void Core::calculateCFov() {
-	std::vector<struct intpair> listed;
+	std::vector<intpair> listed;
 	//FILE* fov_file = fopen("cfov.txt", "w");
 	//fclose(fov_file);
 //fov_file = fopen("cfov.txt", "a+");
@@ -102,7 +102,7 @@ void Core::calculateCFov() {
 	int ringLength = 0;
 	int skipDist = (int)((rad / sqrt(2)));
 	//fprintf(stderr, "%d, %d\n", rad, skipDist);
-	std::vector<struct intpair> newRing;
+	std::vector<fov_data> newRing;
 	int loops = 0;
 	for (int y = -rad; y <= rad; y++) {
 		for (int x = -rad; x <= rad; x++) {
@@ -123,7 +123,9 @@ void Core::calculateCFov() {
 				continue;
 			}
 			//if (floor(dist) <= rad) {
-			struct intpair point(x, y);
+			intpair pt(x, y);
+			fov_data point = fov_data(pt);
+			
 			bool notListed = false;
 			for (int i = 0; i < listed.size(); i++) {
 				if (listed.at(i).x == x && listed.at(i).y == y) {
@@ -134,7 +136,61 @@ void Core::calculateCFov() {
 			//if(ringList[(x+BASE_SIGHT_RANGE+1) + (y+BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE+1)] == 0){
 			if(!notListed){
 				//ringList[(x + BASE_SIGHT_RANGE+1) + (y + BASE_SIGHT_RANGE+1) * (BASE_SIGHT_RANGE + 1)] = 1;
-				listed.push_back(point);
+				listed.push_back(point.point);
+				if (point.point.x * point.point.y > 0) {
+					if (point.point.x > 0) {
+						point.eAng = atan2(point.point.y + 1, point.point.x);
+						point.oAng = atan2(point.point.y, point.point.x + 1);
+						//fprintf(stderr, "1\n");
+					}else {
+						//fprintf(stderr, "2\n");
+						point.eAng = atan2(point.point.y, point.point.x + 1);
+						point.oAng = atan2(point.point.y + 1, point.point.x);
+					}
+				}
+				else if (point.point.x * point.point.y < 0) {
+					if(point.point.x > 0){
+						//fprintf(stderr, "3\n");
+						point.eAng = atan2(point.point.y + 1, point.point.x + 1);
+						point.oAng = atan2(point.point.y, point.point.x);
+					}else {
+						//fprintf(stderr, "4\n");
+						point.eAng = atan2(point.point.y, point.point.x);
+						point.oAng = atan2(point.point.y + 1, point.point.x + 1);	
+					}
+				}else {
+					if (point.point.x == 0 && point.point.y == 0) {
+						point.oAng = 0;
+						point.eAng = 2 * PI;
+						//fprintf(stderr, "5\n");
+					}else if (point.point.x == 0) {
+						if (point.point.y > 0) {
+							//fprintf(stderr, "6\n");
+							point.eAng = atan2(point.point.y, point.point.x);
+							point.oAng = atan2(point.point.y, point.point.x + 1);
+						}
+						else {
+							//fprintf(stderr, "7\n");
+							point.eAng = atan2(point.point.y + 1, point.point.x + 1);
+							point.oAng = atan2(point.point.y + 1, point.point.x);
+						}
+					}else if (point.point.y == 0) {
+						if (point.point.x > 0) {
+							//fprintf(stderr, "8\n");
+							point.eAng = atan2(point.point.y + 1, point.point.x);
+							point.oAng = atan2(point.point.y, point.point.x);
+						}
+						else {
+							//fprintf(stderr, "9\n");
+							point.eAng = atan2(point.point.y, point.point.x + 1);
+							point.oAng = atan2(point.point.y + 1, point.point.x + 1);
+						}
+					}
+				}
+				
+				/*if (point.oAng > point.eAng && !(point.oAng < 0 && point.eAng < 0)) {
+					fprintf(stderr, "(%d,%d) - [%f,%f]\n", point.point.x, point.point.y, point.oAng, point.eAng);
+				}*/
 				newRing.emplace_back(point);
 				ringLength++;
 				
@@ -144,7 +200,6 @@ void Core::calculateCFov() {
 		}
 		
 	}
-	fprintf(stderr, "%d, %d, %d\n", rad, loops, ringLength);
 	cFovRings.emplace_back(newRing);
 	//fprintf(fov_file, "cFovRings.emplace(cFovRings.end(), newRing%d);\n", rad);
 	//fprintf(stderr, "%d\n", rad);

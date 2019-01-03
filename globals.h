@@ -1,4 +1,5 @@
 #pragma once
+#define PI 3.14159265359
 //pixel size of the window
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 576
@@ -48,4 +49,4 @@
 #define GAP_BLOCK_WIDTH 40
 #define GAP_BLOCK_HEIGHT 1
 
-
+enum rmap { EMPTY, TERRAIN, ACTOR, LEGEND_LEN };

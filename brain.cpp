@@ -34,18 +34,20 @@ void Brain::see() {
 		sightMap[i] = 0;
 	}
 	//check in rings of sight around playable
-	int* seeable = new int[(BASE_SIGHT_RANGE+1)*MAX_RING_LEN];
+	/*int* seeable = new int[(BASE_SIGHT_RANGE+1)*MAX_RING_LEN];
 	for (int i = 0; i < (BASE_SIGHT_RANGE + 1)*MAX_RING_LEN; i++) {
 		seeable[i] = 0;
-	}
+	}*/
+	AngleRange* blockRange = new AngleRange();
 	for (int i = 0; i < _host->fovRings.size(); i++) {
 		//fprintf(stderr, "ring %d:\n", i);
-		std::vector<intpair> currRing = _host->fovRings.at(i);
+		std::vector<fov_data> currRing = _host->fovRings.at(i);
 		for (int j = 0; j < _host->fovRings.at(i).size(); j++) {
-			intpair currPair = currRing.at(j);
+			fov_data data = currRing.at(j);
+			intpair currPair = data.point;
 			int x = currPair.x;
 			int y = currPair.y;
-			seeable[j + i * MAX_RING_LEN] = 1;
+			//seeable[j + i * MAX_RING_LEN] = 1;
 			//fprintf(stderr, "(%d,%d)\n", x, y);
 			int cx = x + _host->getX() / TILE_SIZE;
 			int cy = y + _host->getY() / TILE_SIZE;
@@ -54,9 +56,19 @@ void Brain::see() {
 			
 			if (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
 				//if((*rmap)[cx + cy * MAP_WIDTH] != 0 && (*rmap)[cx + cy * MAP_WIDTH] != _host)
-					
-				sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE+1)] = (*rmap)[cx + cy * MAP_WIDTH];
+
+				if (blockRange->inRange(floatrange(data.oAng, data.eAng)) < 0.10) {
+					sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (*rmap)[cx + cy * MAP_WIDTH];
+					if ((*rmap)[cx + cy * MAP_WIDTH] == (Playable*) rmap::TERRAIN) {
+						//fprintf(stderr, "add (%d,%d) [%f,%f]\n", currPair.x, currPair.y, data.oAng, data.eAng);
+						blockRange->addRange(data.oAng, data.eAng);
+					}
+				}
+				else {
+					continue;
+				}
 				
+
 				if (sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] > (Playable*)RESERVED_RMAP_NUMBERS) {
 					if (uniqueSight(sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)]) && sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] != _host) {
 						//fprintf(stderr, "and i see %d\n", (*rmap)[cx + cy * MAP_WIDTH]->getSocial());

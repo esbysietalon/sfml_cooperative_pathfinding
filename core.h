@@ -8,14 +8,13 @@
 class Graphics;
 class Terrain;
 
-enum rmap{ EMPTY, TERRAIN, ACTOR, LEGEND_LEN };
 
 class Core {
 public:
 	Core();
 	~Core();
 
-	std::vector<std::vector<struct intpair>> cFovRings;
+	std::vector<std::vector<struct fov_data>> cFovRings;
 
 private:
 	void update();
@@ -24,7 +23,6 @@ private:
 	void generateNPCs(int num);
 	void mainLoop();
 	void calculateCFov();
-	void generateCFov();
 
 	
 

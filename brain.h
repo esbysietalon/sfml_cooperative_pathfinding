@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "dstarlite.h"
 #include "anytimedstar.h"
+#include "anglerange.h"
 #include <random>
 #include <deque>
 
