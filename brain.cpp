@@ -65,6 +65,8 @@ void Brain::see() {
 					}
 				}
 				else {
+					//sightMap[smx + smy * 2 * (BASE_SIGHT_RANGE + 1)] = (Playable*)3;
+					//fprintf(stderr, "br: %f\n", blockRange->inRange(floatrange(data.oAng, data.eAng)));
 					continue;
 				}
 				
@@ -254,7 +256,9 @@ void Brain::printLemory() {
 			else if (lemoryMap[j + i * LMAP_W] == (Playable*)1) {
 				fprintf(stderr, "* ");
 			}
-			else {
+			else if (lemoryMap[j + i * LMAP_W] == (Playable*)3) {
+				fprintf(stderr, "# ");
+			}else {
 				fprintf(stderr, "- ");
 			}
 			
