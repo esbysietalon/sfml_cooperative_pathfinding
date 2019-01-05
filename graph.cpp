@@ -33,6 +33,9 @@ float Graph::costAdj(intpair start, intpair end) {
 	//if ((start.x == 0 && start.y == 0) || (end.x == 0 && end.y == 0)) {
 		//fprintf(stderr, "HEAR HEAR: (*rmap)[end.x + end.y * mapW] = %d and host = %d\n", (*rmap)[end.x + end.y * mapW], host);
 	//}
+	if (!isIn(start) || !isIn(end)) {
+		return INFINITY;
+	}
 	if (abs(start.x - end.x) > 1 || abs(start.y - end.y) > 1) {
 		//fprintf(stderr, "am i in here?\n");
 		return INFINITY;
@@ -54,13 +57,20 @@ float Graph::costAdj(intpair start, intpair end) {
 	return sqrt(distX * distX + distY * distY);
 }
 bool Graph::isFree(intpair node) {
+	if (!isIn(node)) {
+		return false;
+	}
+	//fprintf(stderr, "isFree call\n");
 	int len = 0;
 	intpair* predArr = new intpair[8];
 	pred(node, &predArr, &len);
 	for (int i = 0; i < len; i++) {
-		if (costAdj(predArr[i], node) < INFINITY)
+		if (costAdj(predArr[i], node) < INFINITY) {
+			//fprintf(stderr, "isFree end\n");
 			return true;
+		}
 	}
+	//fprintf(stderr, "isFree end\n");
 	return false;
 	/*if ((*rmap)[node.x + node.y * mapW] != 0 && (*rmap)[node.x + node.y * mapW] != host)
 		return false;
