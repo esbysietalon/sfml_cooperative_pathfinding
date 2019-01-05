@@ -78,9 +78,9 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 	move_t dir;
 	intpair nearest = tile;
 	int p = 1;
-	fprintf(stderr, "original tile (%d,%d)\n", tile.x, tile.y);
+	//fprintf(stderr, "original tile (%d,%d)\n", tile.x, tile.y);
 	while (!graph->isFree(nearest)) {
-		fprintf(stderr, "nearest candidate is (%d,%d) [origin is (%d,%d)] by %d\n", nearest.x, nearest.y, origin.x, origin.y, this);
+		//fprintf(stderr, "nearest candidate is (%d,%d) [origin is (%d,%d)] by %d\n", nearest.x, nearest.y, origin.x, origin.y, this);
 		int normalX = abs(origin.x - nearest.x);
 		int normalY = abs(origin.y - nearest.y);
 		if (normalX == 0)
@@ -131,7 +131,7 @@ intpair PathFinderPlus::getNearestFree(intpair tile, intpair origin) {
 		
 	}
 	//if (tile != nearest)
-	fprintf(stderr, "nearest is (%d,%d)\n", nearest.x, nearest.y);
+	//fprintf(stderr, "nearest is (%d,%d)\n", nearest.x, nearest.y);
 	return nearest;
 	//dir is what direction to face standing from origin looking at tile
 }

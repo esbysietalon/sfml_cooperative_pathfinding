@@ -11,10 +11,16 @@ Brain::Brain() {
 Brain::~Brain() {
 
 }
-
+void Brain::setMaps(Playable *** amap, rmap_t ** tmap)
+{
+	aMap = amap;
+	tMap = tmap;
+}
 void Brain::setRMap(Playable*** rMap) {
 	rmap = rMap;
 }
+
+
 
 bool Brain::uniqueSight(Playable* sight) {
 	for (int i = 0; i < _sensedEntities.size(); i++) {

@@ -14,6 +14,7 @@ class PathFinder;
 class PathFinderPlus;
 
 enum move_t;
+enum rmap;
 
 enum order_type_t{ MOVE=1, SAY, FOLLOW };
 
@@ -45,6 +46,8 @@ public:
 	
 	void see();
 	void setRMap(Playable*** rMap);
+
+	void setMaps(Playable*** amap, rmap_t** tmap);
 	
 	bool uniqueSight(Playable* sight);
 
@@ -55,6 +58,9 @@ private:
 	Playable** sightMap;
 	Playable** lemoryMap;
 	Playable*** rmap;
+
+	Playable*** aMap;
+	rmap_t** tMap;
 
 	int lemX = LMAP_W / 2;
 	int lemY = LMAP_H / 2;

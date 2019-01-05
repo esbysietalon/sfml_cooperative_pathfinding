@@ -37,4 +37,7 @@ private:
 	sf::Sprite** map;
 
 	Playable** rMap;
+	//not used yet
+	Playable** actorMap;
+	rmap_t* terrainMap;
 };

@@ -11,6 +11,8 @@ void Core::update() {
 	for (int j = 0; j < MAP_HEIGHT; j++) {
 		for (int i = 0; i < MAP_WIDTH; i++) {
 			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) != tile_t::GAP) ? rmap::EMPTY : rmap::TERRAIN);
+
+			//update terrainMap?
 		}
 	}
 	for (size_t i = 0; i < characters.size(); i++) {
@@ -22,8 +24,11 @@ void Core::update() {
 		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
 			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
 				int index = x + ix + (y + iy) * MAP_WIDTH;
-				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0)
+				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && rMap[index] == 0) {
 					rMap[index] = characters.at(i);
+
+					actorMap[index] = characters.at(i);
+				}
 			}
 		}
 
@@ -33,8 +38,11 @@ void Core::update() {
 		for (int iy = -1 * PERSONAL_SPACE; iy <= PERSONAL_SPACE; iy++) {
 			for (int ix = -1 * PERSONAL_SPACE; ix <= PERSONAL_SPACE; ix++) {
 				int index = x + ix + (y + iy) * MAP_WIDTH;
-				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && ((rMap[index] == 0)))
+				if (index >= 0 && index < MAP_HEIGHT * MAP_WIDTH && ((rMap[index] == 0))) {
 					rMap[index] = characters.at(i);
+				
+					actorMap[index] = characters.at(i);
+				}
 			}
 		}
 		//fprintf(stderr, "%d - i\n", i);
@@ -233,7 +241,8 @@ void Core::load() {
 
 	rMap = new Playable*[MAP_WIDTH*MAP_HEIGHT];
 
-
+	actorMap = new Playable*[MAP_WIDTH*MAP_HEIGHT];
+	terrainMap = new rmap_t[MAP_WIDTH*MAP_HEIGHT];
 
 	//load floor
 	for (int i = (int)tile_t::FLOOR_1; i < (int)tile_t::NUM_TILES - 1; i++) {
@@ -253,6 +262,9 @@ void Core::load() {
 			map[i + j * MAP_WIDTH]->setTexture(*(terrain->getTileTAt(i, j)));
 			map[i + j * MAP_WIDTH]->setPosition(i * 16, j * 16);
 			rMap[i + j * MAP_WIDTH] = (Playable*)((terrain->getTileAt(i, j) != tile_t::GAP) ? rmap::EMPTY : rmap::TERRAIN);
+
+			actorMap[i + j * MAP_WIDTH] = 0;
+			terrainMap[i + j * MAP_WIDTH] = ((terrain->getTileAt(i, j) != tile_t::GAP) ? rmap::EMPTY : rmap::TERRAIN);
 		}
 	}
 

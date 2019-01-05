@@ -53,6 +53,8 @@ public:
 
 	void setRMap(Playable***);
 
+	void setMaps(Playable*** amap, rmap** tmap);
+
 	void setSocial(int social);
 
 	void setFov(std::vector<std::vector<fov_data>> fov);

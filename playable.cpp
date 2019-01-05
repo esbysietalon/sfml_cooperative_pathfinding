@@ -46,6 +46,11 @@ void Playable::setRMap(Playable*** rMap) {
 	brain->setRMap(rMap);
 }
 
+void Playable::setMaps(Playable *** amap, rmap ** tmap)
+{
+	brain->setMaps(amap, tmap);
+}
+
 void Playable::setSocial(int social)
 {
 	brain->setSocial(social);

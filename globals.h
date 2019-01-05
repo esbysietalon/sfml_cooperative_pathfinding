@@ -50,4 +50,4 @@
 #define GAP_BLOCK_HEIGHT 1
 
 #define VISIBILITY 0.999
-enum rmap { EMPTY, TERRAIN, ACTOR, LEGEND_LEN };
+enum rmap_t { EMPTY, TERRAIN, ACTOR, LEGEND_LEN };
