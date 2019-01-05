@@ -54,11 +54,17 @@ float Graph::costAdj(intpair start, intpair end) {
 	return sqrt(distX * distX + distY * distY);
 }
 bool Graph::isFree(intpair node) {
-	if (!isIn(node))
+	int len = 0;
+	intpair* predArr = new intpair[8];
+	pred(node, &predArr, &len);
+	for (int i = 0; i < len; i++) {
+		if (costAdj(predArr[i], node) < INFINITY)
+			return true;
+	}
+	return false;
+	/*if ((*rmap)[node.x + node.y * mapW] != 0 && (*rmap)[node.x + node.y * mapW] != host)
 		return false;
-	if ((*rmap)[node.x + node.y * mapW] != 0 && (*rmap)[node.x + node.y * mapW] != host)
-		return false;
-	return true;
+	return true;*/
 }
 bool Graph::isIn(intpair node) {
 	if (node.x >= 0 && node.x < mapW && node.y >= 0 && node.y < mapH)
@@ -85,7 +91,7 @@ void Graph::pred(intpair node, intpair** arr, int* outlen)
 					//fprintf(stderr, "(%d,%d) is in map\n", node.x + xp, node.y + yp);
 					//fprintf(stderr, "(%d,%d) is in - before rmap[%d] access\n", node.x + xp, node.y + yp, (node.x + xp) + (node.y + yp) * mapW);
 					//fprintf(stderr, "rmap[%d] is %d\n", (node.x + xp) + (node.y + yp) * mapW, (*rmap)[(node.x + xp) + (node.y + yp) * mapW]);
-					if ((*rmap)[(node.x + xp) + (node.y + yp) * mapW] == 0 || (*rmap)[(node.x + xp) + (node.y + yp) * mapW] == host) {
+					if (costAdj(intpair(node.x + xp, node.y + yp), node) < INFINITY) {
 						//fprintf(stderr, "accessing out[%d]\n", *outlen);
 						//fprintf(stderr, "adding in (%d,%d)\n", node.x + xp, node.y + yp);
 						(*arr)[*outlen] = intpair(node.x + xp, node.y + yp);
